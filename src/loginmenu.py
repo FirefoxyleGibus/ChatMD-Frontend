@@ -1,6 +1,6 @@
 from src.basemenu import BaseMenu
 from src.termutil import *
-import time
+import datetime
 import locale
 locale.setlocale(locale.LC_ALL, "")
 
@@ -41,9 +41,9 @@ class LoginMenu(BaseMenu):
                 print_at((term.width-24)*0.5, term.height*0.5+4, term.normal + term.blink(">"))
                 print_at((term.width+24)*0.5, term.height*0.5+4, term.normal + term.blink("<"))
 
-        t = time.gmtime(time.time())
+        dt = datetime.datetime.now()
 
-        print_at(1,term.height-2, term.normal + f"Il est {time.strftime('%H:%M:%S', t)}, nous sommes le {time.strftime('%A%e %B %Y', t)}.")
+        print_at(1,term.height-2, term.normal + f"Il est {dt.strftime('%H:%M:%S')}, nous sommes le {dt.strftime('%A %d %B %Y')}.")
 
 
     def handle_input(self) -> None:
