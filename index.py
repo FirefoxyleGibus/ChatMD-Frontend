@@ -1,10 +1,12 @@
 from src.loginmenu import *
+from src.chatmenu import *
 from src.termutil import *
 
 menus:dict[str, BaseMenu] = {
-    "login": LoginMenu()
+    "login": LoginMenu(),
+    "chat": ChatMenu()
 }
-curmenu = "login"
+curmenu = "chat"
 
 token = ""
 
