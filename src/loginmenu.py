@@ -13,7 +13,8 @@ class LoginMenu(BaseMenu):
 
     def login(self, username, password) -> tuple:
 
-        # pretend there's an http request in here
+        # pretend there's an http request in here - Guigui
+        # Yeah let's just pretend - Foxy
 
         token = "nope"
 
