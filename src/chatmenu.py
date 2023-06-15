@@ -1,3 +1,10 @@
+# ---------------------------
+# Move those where you want guigui
+# TO DO : Handle connection with ws
+# TO DO : Handle reception
+#       Either a "show message" func or smth else, i'll try to work with it dw
+# ---------------------------
+
 from src.basemenu import *
 
 class ChatMenu(BaseMenu):

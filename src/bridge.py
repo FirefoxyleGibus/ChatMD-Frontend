@@ -7,16 +7,20 @@
 #       send_message() : sends a message to the server
 #       connect() : connects to a server
 # ---------------------------
-# First time doing those stuff
+# TO DO : Handle HTTPS creds (and that's all)
 # ---------------------------
 
+import json
 import asyncio
-from websockets.sync.client import connect
 
-def test():
-    with connect("https://chatmd.tanukii.dev") as websocket:
-        websocket.send("HEARTBEAT")
-        message = websocket.recv()
-        print(f"\"{message}\" received")
+def ping(websocket): # Sends a PING message and prints the answer !! DEBUG FUNCTION !!
+    websocket.send("PING")
+    print(websocket.recv())
+
+def send_message(message, websocket): # Sends a message to the server !! DOESN'T LOG ANYTHING !!
+    websocket.send(message)
+
+def close_connection(websocket): # Closes the connection
+    websocket.close()
 
 # Created by Foxy - Created at 15/06/2023
