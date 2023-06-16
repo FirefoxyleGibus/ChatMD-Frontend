@@ -1,18 +1,15 @@
 from src.loginmenu import *
 from src.chatmenu import *
-from src.termutil import *
+from src.termutil import term
+import src.termutil as _g
 
-menus:dict[str, BaseMenu] = {
-    "login": LoginMenu(),
-    "chat": ChatMenu()
-}
-curmenu = "chat"
+_g.menus["login"] = LoginMenu()
+_g.menus["chat"] = ChatMenu()
 
-token = ""
 
 if __name__ == "__main__":
     with term.fullscreen(), term.cbreak(), term.hidden_cursor():
         print(term.clear)
-        while not menus[curmenu].turnOff:
-            menus[curmenu].draw()
-            menus[curmenu].handle_input()
+        while not _g.menus[_g.curmenu].turnOff:
+            _g.menus[_g.curmenu].draw()
+            _g.menus[_g.curmenu].handle_input()

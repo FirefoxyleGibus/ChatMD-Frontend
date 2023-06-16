@@ -1,5 +1,6 @@
 from src.basemenu import BaseMenu
-from src.termutil import *
+from src.termutil import term, print_at, textbox_logic, Keystroke
+import src.termutil as _g
 import datetime
 import locale
 locale.setlocale(locale.LC_ALL, "")
@@ -12,13 +13,13 @@ class LoginMenu(BaseMenu):
     cursorPos = [0,0]
 
     def login(self, username, password) -> tuple:
-
         # pretend there's an http request in here - Guigui
         # Yeah let's just pretend - Foxy
 
         token = "nope"
 
         if username != "" and password != "":
+            # ok this is where you can make the request
             return 0, token
         else:
             return 1, ""
@@ -62,9 +63,7 @@ class LoginMenu(BaseMenu):
                 if val.name == "KEY_ENTER":
                     coderesult, newtoken = self.login(self.username, self.password)
                     if coderesult == 0:
-                        global token, curmenu
-                        token = newtoken
-
-                        # - TODO: create chat interface
-                        # curmenu = "chat"
-                        self.turnOff = True # supprime cette ligne une fois que l'interface de chat est crée
+                        _g.token = newtoken
+                        _g.curmenu = "chat"
+                        _g.menus[_g.curmenu].connect(_g.token)
+                        print(term.clear)

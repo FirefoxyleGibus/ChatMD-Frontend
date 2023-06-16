@@ -2,6 +2,12 @@ from blessed import *
 from blessed.keyboard import *
 
 term = Terminal()
+menus = {
+    "login": None,
+    "chat": None
+}
+curmenu = "login"
+token = ""
 
 # shamelessly stolen from HastagGuigui/shellrhythm, by HastagGuigui himself
 

@@ -1,10 +1,3 @@
-# ---------------------------
-# Move those where you want guigui
-# TO DO : Handle connection with ws
-# TO DO : Handle reception
-#       Either a "show message" func or smth else, i'll try to work with it dw
-# ---------------------------
-
 from src.basemenu import *
 
 class ChatMenu(BaseMenu):
@@ -18,11 +11,7 @@ class ChatMenu(BaseMenu):
         ('leave', "[null]")
     ]
     cursor = 0
-    def draw(self) -> None:
-        print_at(0, term.height-2, ">>> " + self.currentlytyped + term.clear_eol)
-        print_at(1,0,f"#{self.channel}")
-        print_at(0,1, "─"*term.width)
-        print_at(0,term.height-3, "─"*term.width)
+    def draw_messages(self):
         curmsg = len(self.messages)-1
         msgdrawpos = term.height-4
         while msgdrawpos > 2 and curmsg >= 0:
@@ -44,6 +33,13 @@ class ChatMenu(BaseMenu):
                     msgdrawpos-=1
             curmsg -= 1
 
+    def draw(self) -> None:
+        print_at(0, term.height-2, ">>> " + self.currentlytyped + term.clear_eol)
+        print_at(1,0,f"#{self.channel}")
+        print_at(0,1, "─"*term.width)
+        print_at(0,term.height-3, "─"*term.width)
+        self.draw_messages()
+
     def handle_input(self):
         val = super().handle_input()
         if val.name == "KEY_ENTER" and self.currentlytyped != "":
@@ -53,6 +49,16 @@ class ChatMenu(BaseMenu):
         else:
             self.currentlytyped, self.cursor = textbox_logic(self.currentlytyped, self.cursor, val)
 
+    def connect(self, token):
+        # ---------------------------
+        # okay foxy moved your thing here
+        # TO DO : Handle connection with ws
+        # TO DO : Handle reception
+        #       Either a "show message" func or smth else, i'll try to work with it dw
+        # ---------------------------
+
+        self.messages.append(("join", self.name))
+
+
     def __init__(self) -> None:
         super().__init__()
-        self.messages.append(("join", self.name))
