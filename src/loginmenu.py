@@ -25,14 +25,15 @@ class LoginMenu(BaseMenu):
             return 1, ""
 
     def draw(self) -> None:
-        logintext = "Salut!"
+        locale = _g.user_settings.get_locale()
+        logintext = locale.get("login") 
         print_at((term.width-len(logintext))*0.5, term.height*0.5-5, logintext)
-        print_at((term.width-40)*0.5, term.height*0.5-2, term.center("Nom d'utilisateur", 40))
+        print_at((term.width-40)*0.5, term.height*0.5-2, term.center(locale.get("username"), 40))
         print_at((term.width-40)*0.5, term.height*0.5-1, term.reverse + term.center(self.username, 40) + term.normal)
-        print_at((term.width-40)*0.5, term.height*0.5+1, term.center("Mot de passe", 40))
+        print_at((term.width-40)*0.5, term.height*0.5+1, term.center(locale.get("password"), 40))
         print_at((term.width-40)*0.5, term.height*0.5+2, term.reverse + term.center("*"*len(self.password), 40) + term.normal)
 
-        print_at((term.width-20)*0.5, term.height*0.5+4, term.reverse + term.center("Se connecter", 20))
+        print_at((term.width-20)*0.5, term.height*0.5+4, term.reverse + term.center(locale.get("connect"), 20))
 
         match self.selec:
             case 0:
