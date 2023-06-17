@@ -1,4 +1,5 @@
 from src.basemenu import *
+from src.user_prefs.user_settings import *
 
 class ChatMenu(BaseMenu):
     currentlytyped = ""
@@ -12,6 +13,7 @@ class ChatMenu(BaseMenu):
     ]
     cursor = 0
     def draw_messages(self):
+        locale = UserSettings.get_current().get_locale()
         curmsg = len(self.messages)-1
         msgdrawpos = term.height-4
         while msgdrawpos > 2 and curmsg >= 0:
@@ -26,10 +28,10 @@ class ChatMenu(BaseMenu):
                         print_at(usrw,msgdrawpos-(lineAmount-1)+i,nowmsg[2][i*maxw:(i+1)*maxw])
                     msgdrawpos-=lineAmount
                 case 'join':
-                    print_at(0, msgdrawpos, term.green("[+]") + f" Welcome, {term.bold(nowmsg[1])}!")
+                    print_at(0, msgdrawpos, term.green("[+]") + f" {locale.get('welcome')}, {term.bold(nowmsg[1])}!")
                     msgdrawpos-=1
                 case 'leave':
-                    print_at(0, msgdrawpos, term.red("[-]") + f" Goodbye, {term.bold(nowmsg[1])}!")
+                    print_at(0, msgdrawpos, term.red("[-]") + f" {locale.get('goodbye')}, {term.bold(nowmsg[1])}!")
                     msgdrawpos-=1
             curmsg -= 1
 

@@ -8,6 +8,7 @@ menus = {
 }
 curmenu = "login"
 token = ""
+user_settings = None
 
 # shamelessly stolen from HastagGuigui/shellrhythm, by HastagGuigui himself
 
