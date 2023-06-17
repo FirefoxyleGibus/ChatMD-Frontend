@@ -3,6 +3,7 @@ from src.termutil import term, print_at, textbox_logic, Keystroke
 import src.termutil as _g
 import datetime
 import locale
+import requests
 locale.setlocale(locale.LC_ALL, "")
 
 class LoginMenu(BaseMenu):
@@ -19,7 +20,8 @@ class LoginMenu(BaseMenu):
         token = "nope"
 
         if username != "" and password != "":
-            # ok this is where you can make the request
+            response = requests.get("http://chatmd.tanukii.dev", params = {"username":username, "password":password})
+            print(response)
             return 0, token
         else:
             return 1, ""
