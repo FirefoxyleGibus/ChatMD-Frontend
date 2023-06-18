@@ -1,21 +1,20 @@
-import sys
 import os
+import sys
 import subprocess
 
 CONFIG_FILE = 'user_settings.yml'
 
 def first_setup():
+    """
+    Setup libraries (install or update) and config file on startup
+    """
+    # install or update libraries
     # check if user_settings.yml exists
-    if os.path.isfile(CONFIG_FILE):
-        return
+    if not os.path.isfile(CONFIG_FILE):
+        subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-r', 'requirements.txt'])
+    else:
+        config_mtime = os.path.getmtime(CONFIG_FILE)
+        requirements_mtime = os.path.getmtime('requirements.txt')
+        if config_mtime < requirements_mtime: # update
+            subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-r', 'requirements.txt'])
 
-    # install libraries
-    install_lib = lambda name: subprocess.check_call([sys.executable, '-m', 'pip', 'install', name])
-    with open('requirements.txt') as f:
-        packages = f.readlines()
-        for package in packages:
-            if len(package) > 1:
-                package = package.split(">")[0].split("<")[0].lstrip()
-                print("Installing: ", package)
-                install_lib(package)
-        f.close()
