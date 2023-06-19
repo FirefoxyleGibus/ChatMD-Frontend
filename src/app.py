@@ -12,6 +12,7 @@ class App:
         self.user_settings = None
 
         self.terminal = Terminal()
+        self._is_running = True
 
         App.instance = self
 
@@ -34,9 +35,11 @@ class App:
     def run(self) -> None:
         """ Run """
         term = self.terminal
+        self._is_running = True
         with term.fullscreen(), term.cbreak(), term.hidden_cursor():
             print(term.clear)
-            while not self.get_menu(self.current_menu).turnOff:
+            while self._is_running \
+                and not self.get_menu(self.current_menu).turnOff:
                 self.draw()
                 self.handle_input()
 
@@ -49,6 +52,10 @@ class App:
         """ Handle inputs for the current menu """
         if self.current_menu:
             self.get_menu(self.current_menu).handle_input(self.terminal)
+    
+    def quit(self):
+        """ Quit the application """
+        self._is_running = False
 
     @staticmethod
     def get_instance():

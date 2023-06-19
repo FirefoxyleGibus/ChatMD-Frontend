@@ -1,6 +1,7 @@
 from websockets import connect
 
 from src.menus.basemenu import *
+from src.app import App
 from src.user_prefs.user_settings import *
 from src.bridge import *
 
@@ -25,6 +26,7 @@ class ChatMenu(BaseMenu):
     #   ('leave', "[null]")
     ]
     cursor = 0
+    quit_button_selected = False
 
     def __init__(self):
         super().__init__("chat")
@@ -54,18 +56,32 @@ class ChatMenu(BaseMenu):
             curmsg -= 1
 
     def draw(self, terminal) -> None:
-        print_at(terminal, 0, terminal.height-2, ">>> " + self.currentlytyped + terminal.clear_eol)
+        lang = App.get_instance().user_settings.get_locale()
+        print_at(terminal, 0, terminal.height-2, ">>  " + self.currentlytyped + terminal.clear_eol)
         print_at(terminal, 1,0,f"#{self.channel}")
         print_at(terminal, 0,1, "─"*terminal.width)
         print_at(terminal, 0,terminal.height-3, "─"*terminal.width)
+        print_at(terminal, terminal.width - len(lang.get("quit")),0, lang.get("quit"))
+
+        if self.quit_button_selected:
+            print_at(terminal, terminal.width - len(lang.get("quit")) - 2, 0, terminal.blink(">"))
+        else:
+            print_at(terminal, 2,terminal.height-2,terminal.blink('>'))
+        
         self._draw_messages(terminal)
 
     def handle_input(self, terminal):
         val = super().handle_input(terminal)
-        if val.name == "KEY_ENTER" and self.currentlytyped != "":
-            self.messages.append(('message', self.name, self.currentlytyped))
+        if val.name == "KEY_ENTER":
+            if self.currentlytyped != "":
+                self.messages.append(('message', self.name, self.currentlytyped))
+                print(terminal.clear)
+                self.currentlytyped = ""
+            elif self.quit_button_selected:
+                App.get_instance().quit()
+        if val.name == "KEY_DOWN" or val.name == "KEY_UP":
             print(terminal.clear)
-            self.currentlytyped = ""
+            self.quit_button_selected = not self.quit_button_selected
         else:
             self.currentlytyped, self.cursor = textbox_logic(self.currentlytyped, self.cursor, val)
 
@@ -89,5 +105,4 @@ class ChatMenu(BaseMenu):
             case 1:
                 self.messages.append(('leave', username))
             case 2:
-                self.messages.append(('message', username, content))
-
+                self.messages.append(('message', username, content))    

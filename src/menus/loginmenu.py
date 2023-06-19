@@ -15,7 +15,7 @@ class LoginMenu(BaseMenu):
     username = ""
     password = ""
     selec = 0
-    maxoptions = 3 #Username, Password, Confirm
+    maxoptions = 4 #Username, Password, Confirm, Quit
     cursorPos = [0,0]
 
     def __init__(self):
@@ -48,6 +48,8 @@ class LoginMenu(BaseMenu):
 
         print_at(terminal, (terminal.width-20)*0.5, terminal.height*0.5+4, terminal.reverse + terminal.center(lang.get("connect"), 20))
 
+        print_at(terminal, (terminal.width-20)*0.5, terminal.height*0.5+6, terminal.reverse + terminal.center(lang.get("quit"), 20))
+
         match self.selec:
             case 0:
                 print_at(terminal, (terminal.width-44)*0.5, terminal.height*0.5-1, terminal.normal + terminal.blink(">"))
@@ -56,7 +58,9 @@ class LoginMenu(BaseMenu):
             case 2:
                 print_at(terminal, (terminal.width-24)*0.5, terminal.height*0.5+4, terminal.normal + terminal.blink(">"))
                 print_at(terminal, (terminal.width+24)*0.5, terminal.height*0.5+4, terminal.normal + terminal.blink("<"))
-
+            case 3:
+                print_at(terminal, (terminal.width-4)*0.5, terminal.height*0.5+6, terminal.normal + terminal.blink(">"))
+                print_at(terminal, (terminal.width+4)*0.5, terminal.height*0.5+6, terminal.normal + terminal.blink("<"))
         dt = datetime.datetime.now()
 
         print_at(terminal, 1,terminal.height-2, terminal.normal + f"Il est {dt.strftime('%H:%M:%S')}, nous sommes le {dt.strftime('%A %d %B %Y')}.")
@@ -82,5 +86,7 @@ class LoginMenu(BaseMenu):
                         app.show_menu("chat")
                         app.get_menu("chat").connect(app.token)
                         print(terminal.clear)
-
+            case 3:
+                if val.name == "KEY_ENTER":
+                    app = App.get_instance().quit()
  
