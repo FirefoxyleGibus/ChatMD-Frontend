@@ -28,14 +28,23 @@ class LoginMenu(BaseMenu):
         token = "nope"
 
         if username != "" and password != "":
-            response = requests.post("http://localhost:8080/auth/login", data = {"username":username, "password":password}, timeout=5000)
+            response = requests.post("http://localhost:8080/auth/login", data = {"username":username, "password":password}, timeout=5.0)
             fullResponse = json.loads(response.text)
             if (fullResponse["code"] == 200):
-                return 0, fullResponse["session"]
+                return 0, fullResponse["data"]["session"]
             else:
                 return 1, ""
         else:
             return 1, ""
+
+    def register(self, username, password) -> tuple:
+        if username != "" and password != "":
+            response = requests.post("http://localhost:8080/auth/register", data={"username": username, "password": password}, timeout=5.0)
+            fullResponse = json.loads(response.text)
+            if (fullResponse["code"] == 200):
+                return 0, fullResponse["data"]["session"]
+            return 1, "token"
+        return 1, ""
 
     def draw(self, terminal) -> None:
         lang = App.get_instance().user_settings.get_locale()
