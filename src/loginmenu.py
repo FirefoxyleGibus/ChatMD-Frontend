@@ -3,6 +3,8 @@ from src.termutil import term, print_at, textbox_logic, Keystroke
 import src.termutil as _g
 import datetime
 import locale
+import requests
+import json
 locale.setlocale(locale.LC_ALL, "")
 
 class LoginMenu(BaseMenu):
@@ -19,8 +21,12 @@ class LoginMenu(BaseMenu):
         token = "nope"
 
         if username != "" and password != "":
-            # ok this is where you can make the request
-            return 0, token
+            response = requests.post("http://localhost:8080/auth/login", data = {"username":username, "password":password})
+            fullResponse = json.loads(response.text)
+            if (fullResponse["code"] == 200):
+                return 0, fullResponse["session"]
+            else:
+                return 1, ""
         else:
             return 1, ""
 
@@ -66,5 +72,6 @@ class LoginMenu(BaseMenu):
                     if coderesult == 0:
                         _g.token = newtoken
                         _g.curmenu = "chat"
+                        _g.menus[_g.curmenu].name = self.username
                         _g.menus[_g.curmenu].connect(_g.token)
                         print(term.clear)
