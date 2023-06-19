@@ -1,6 +1,7 @@
 from src.basemenu import *
 from src.user_prefs.user_settings import *
 from websockets import connect
+import bridge
 
 # ---------------------------
 # TO DO : Handle reception
@@ -63,6 +64,7 @@ class ChatMenu(BaseMenu):
 
     def connect(self, token):
         self.websocket = connect("wss://chatmd.tanukii.dev/ws", extra_headers={"Authorization": f"Bearer {token}"})
+        bridge.receive(self.websocket)
         self.messages.append(("join", self.name))
     
     def print_message(self, mesType, username, content, color=0x0):
