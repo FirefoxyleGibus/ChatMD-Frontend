@@ -4,6 +4,7 @@ import src.termutil as _g
 import datetime
 import locale
 import requests
+import json
 locale.setlocale(locale.LC_ALL, "")
 
 class LoginMenu(BaseMenu):
@@ -20,9 +21,12 @@ class LoginMenu(BaseMenu):
         token = "nope"
 
         if username != "" and password != "":
-            response = requests.get("http://chatmd.tanukii.dev", params = {"username":username, "password":password})
-            print(response)
-            return 0, token
+            response = requests.post("http://localhost:8080/auth/login", data = {"username":username, "password":password})
+            fullResponse = json.loads(response.text)
+            if (fullResponse["code"] == 200):
+                return 0, fullResponse["session"]
+            else:
+                return 1, ""
         else:
             return 1, ""
 

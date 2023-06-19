@@ -1,15 +1,15 @@
 from src.basemenu import *
 from src.user_prefs.user_settings import *
 from websockets import connect
-import bridge
+from src.bridge import *
 
 # ---------------------------
 # TO DO : Handle reception
 #       Either a "show message" func or smth else, i'll try to work with it dw
 # Tell me how it works
 # ---------------------------
-# Also now you can type bridge.send_message(message, self.websocket) when you want to send a message
-# and bridge.close_connection(self.websocket) to close the connection
+# Also now you can type send_message(message, self.websocket) when you want to send a message
+# and close_connection(self.websocket) to close the connection
 # /!\ DON'T FORGET TO CLOSE THE CONNECTION /!\
 
 class ChatMenu(BaseMenu):
@@ -63,8 +63,8 @@ class ChatMenu(BaseMenu):
             self.currentlytyped, self.cursor = textbox_logic(self.currentlytyped, self.cursor, val)
 
     def connect(self, token):
-        self.websocket = connect("wss://chatmd.tanukii.dev/ws", extra_headers={"Authorization": f"Bearer {token}"})
-        bridge.receive(self.websocket)
+        self.websocket = connect("ws://localhost:8080/ws", extra_headers={"Authorization": f"Bearer {token}"})
+        receive(self.websocket)
         self.messages.append(("join", self.name))
     
     def print_message(self, mesType, username, content, color=0x0):
