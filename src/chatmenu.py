@@ -61,24 +61,22 @@ class ChatMenu(BaseMenu):
         else:
             self.currentlytyped, self.cursor = textbox_logic(self.currentlytyped, self.cursor, val)
 
-    def connect(self, token):
-        # Let's pretend that we connecting
-    
+
     def print_message(self, mesType, username, content, color=0x0):
         """
         Appends a message to the screen
         
         mesType:
-            0 : join
-            1 : leave
-            2 : message
+            "Join" : join
+            "Leave" : leave
+            others : message
         """
         match mesType:
-            case 0:
+            case "Join":
                 self.messages.append(('join', username))
-            case 1:
+            case "Leave":
                 self.messages.append(('leave', username))
-            case 2:
+            default:
                 self.messages.append(('message', username, content))
 
 
