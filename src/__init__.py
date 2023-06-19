@@ -15,6 +15,9 @@ def main():
     app.register_menu(ChatMenu())
 
     # Start on login menu
+    # app = App().get_instance()
+    # coderesult, newtoken = app.get_menu("login").login(username, password)
+    app.get_menu("chat").connect("token")
     app.show_menu("chat")
 
     app.run()

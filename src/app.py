@@ -55,6 +55,10 @@ class App:
     
     def quit(self):
         """ Quit the application """
+        try:
+            self.get_menu("chat").connection.close()
+        except:
+            pass
         self._is_running = False
 
     @staticmethod
