@@ -12,7 +12,7 @@
 
 import json
 import asyncio
-import termutil
+from src.termutil import *
 
 def ping(websocket): # Sends a PING message and prints the answer !! DEBUG FUNCTION !!
     websocket.send("PING")
