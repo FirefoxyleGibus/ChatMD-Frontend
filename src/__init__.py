@@ -1,20 +1,20 @@
-from src.loginmenu import *
-from src.chatmenu import *
-from src.termutil import term
-import src.termutil as _g
 from src.user_prefs.user_settings import UserSettings
+from src.app import App
+
+from src.menus.chatmenu import ChatMenu
+from src.menus.loginmenu import LoginMenu
+
 import datetime
 
 def main():
-    _g.user_settings = UserSettings()
+    app = App()
+    app.user_settings = UserSettings()
+    app.user_settings.set("last_opened", datetime.datetime.now().strftime('%H:%M:%S %A %d %B %Y'))
 
-    _g.user_settings.set("last_opened", datetime.datetime.now().strftime('%H:%M:%S %A %d %B %Y'))
+    app.register_menu(LoginMenu())
+    app.register_menu(ChatMenu())
 
-    _g.menus["login"] = LoginMenu()
-    _g.menus["chat"] = ChatMenu()
+    # Start on login menu
+    app.show_menu("login")
 
-    with term.fullscreen(), term.cbreak(), term.hidden_cursor():
-        print(term.clear)
-        while not _g.menus[_g.curmenu].turnOff:
-            _g.menus[_g.curmenu].draw()
-            _g.menus[_g.curmenu].handle_input()
+    app.run()
