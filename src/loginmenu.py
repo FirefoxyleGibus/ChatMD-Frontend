@@ -5,6 +5,8 @@ import datetime
 import locale
 import requests
 import json
+
+import asyncio
 locale.setlocale(locale.LC_ALL, "")
 
 class LoginMenu(BaseMenu):
@@ -27,6 +29,7 @@ class LoginMenu(BaseMenu):
                 return 0, fullResponse["session"]
             else:
                 return 1, ""
+            return 0, "token"
         else:
             return 1, ""
 

@@ -1,6 +1,5 @@
 from src.basemenu import *
 from src.user_prefs.user_settings import *
-from websockets import connect
 from src.bridge import *
 
 # ---------------------------
@@ -63,9 +62,7 @@ class ChatMenu(BaseMenu):
             self.currentlytyped, self.cursor = textbox_logic(self.currentlytyped, self.cursor, val)
 
     def connect(self, token):
-        self.websocket = connect("ws://localhost:8080/ws", extra_headers={"Authorization": f"Bearer {token}"})
-        receive(self.websocket)
-        self.messages.append(("join", self.name))
+        # Let's pretend that we connecting
     
     def print_message(self, mesType, username, content, color=0x0):
         """
