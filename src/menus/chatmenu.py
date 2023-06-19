@@ -27,6 +27,7 @@ class ChatMenu(BaseMenu):
     ]
     cursor = 0
     quit_button_selected = False
+    connection = None
 
     def __init__(self):
         super().__init__("chat")
