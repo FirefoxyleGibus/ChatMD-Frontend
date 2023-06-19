@@ -18,9 +18,9 @@ class ChatMenu(BaseMenu):
     color = 0x17ff67
     channel = "general"
     messages = [
-        ('join', "[null]"),
-        ('message', "[null]", "sup you motherfuckers it's me null the one and only now cry about it hahahahaha, now check this out im gonna make this text multiline and you can't do shit about it"),
-        ('leave', "[null]")
+#         ('join', "[null]"),
+#         ('message', "[null]", "sup you motherfuckers it's me null the one and only now cry about it hahahahaha, now check this out im gonna make this text multiline and you can't do shit about it"),
+#         ('leave', "[null]")
     ]
     cursor = 0
     def draw_messages(self):

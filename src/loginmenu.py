@@ -72,5 +72,6 @@ class LoginMenu(BaseMenu):
                     if coderesult == 0:
                         _g.token = newtoken
                         _g.curmenu = "chat"
+                        _g.menus[_g.curmenu].name = self.username
                         _g.menus[_g.curmenu].connect(_g.token)
                         print(term.clear)
