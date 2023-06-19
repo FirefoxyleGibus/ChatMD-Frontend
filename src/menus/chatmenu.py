@@ -1,5 +1,17 @@
+from websockets import connect
+
 from src.menus.basemenu import *
 from src.user_prefs.user_settings import *
+from src.bridge import *
+
+# ---------------------------
+# TO DO : Handle reception
+#       Either a "show message" func or smth else, i'll try to work with it dw
+# Tell me how it works
+# ---------------------------
+# Also now you can type send_message(message, self.websocket) when you want to send a message
+# and close_connection(self.websocket) to close the connection
+# /!\ DON'T FORGET TO CLOSE THE CONNECTION /!\
 
 class ChatMenu(BaseMenu):
     """ Chat menu """
@@ -8,14 +20,15 @@ class ChatMenu(BaseMenu):
     color = 0x17ff67
     channel = "general"
     messages = [
-        ('join', "[null]"),
-        ('message', "[null]", "sup you motherfuckers it's me null the one and only now cry about it hahahahaha, now check this out im gonna make this text multiline and you can't do shit about it"),
-        ('leave', "[null]")
+    #   ('join', "[null]"),
+    #   ('message', "[null]", "sup you motherfuckers it's me null the one and only now cry about it hahahahaha, now check this out im gonna make this text multiline and you can't do shit about it"),
+    #   ('leave', "[null]")
     ]
     cursor = 0
 
     def __init__(self):
         super().__init__("chat")
+        self.websocket = None
 
     def _draw_messages(self, terminal):
         locale = UserSettings.get_current().get_locale()
@@ -57,11 +70,24 @@ class ChatMenu(BaseMenu):
             self.currentlytyped, self.cursor = textbox_logic(self.currentlytyped, self.cursor, val)
 
     def connect(self, token):
-        # ---------------------------
-        # okay foxy moved your thing here
-        # TO DO : Handle connection with ws
-        # TO DO : Handle reception
-        #       Either a "show message" func or smth else, i'll try to work with it dw
-        # ---------------------------
-
+        self.websocket = connect("ws://localhost:8080/ws", extra_headers={"Authorization": f"Bearer {token}"})
+        receive(self.websocket)
         self.messages.append(("join", self.name))
+    
+    def print_message(self, message_type, username, content, color=0x0):
+        """
+        Appends a message to the screen
+        
+        message_type:
+            0 : join
+            1 : leave
+            2 : message
+        """
+        match message_type:
+            case 0:
+                self.messages.append(('join', username))
+            case 1:
+                self.messages.append(('leave', username))
+            case 2:
+                self.messages.append(('message', username, content))
+

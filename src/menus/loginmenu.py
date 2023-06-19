@@ -1,6 +1,9 @@
 import datetime
 import locale
 
+import requests
+import json
+
 from src.menus.basemenu import BaseMenu
 from src.termutil import print_at, textbox_logic, Keystroke
 from src.app import App
@@ -19,16 +22,20 @@ class LoginMenu(BaseMenu):
         super().__init__("login")
 
     def login(self, username, password) -> tuple:
-        """ Login """
         # pretend there's an http request in here - Guigui
         # Yeah let's just pretend - Foxy
 
         token = "nope"
 
         if username != "" and password != "":
-            # ok this is where you can make the request
-            return 0, token
-        return 1, ""
+            response = requests.post("http://localhost:8080/auth/login", data = {"username":username, "password":password}, timeout=5000)
+            fullResponse = json.loads(response.text)
+            if (fullResponse["code"] == 200):
+                return 0, fullResponse["session"]
+            else:
+                return 1, ""
+        else:
+            return 1, ""
 
     def draw(self, terminal) -> None:
         lang = App.get_instance().user_settings.get_locale()
@@ -75,3 +82,5 @@ class LoginMenu(BaseMenu):
                         app.show_menu("chat")
                         app.get_menu("chat").connect(app.token)
                         print(terminal.clear)
+
+ 

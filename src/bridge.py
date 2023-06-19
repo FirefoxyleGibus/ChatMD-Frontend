@@ -12,6 +12,7 @@
 
 import json
 import asyncio
+from src.termutil import *
 
 def ping(websocket): # Sends a PING message and prints the answer !! DEBUG FUNCTION !!
     websocket.send("PING")
@@ -22,5 +23,12 @@ def send_message(message, websocket): # Sends a message to the server !! DOESN'T
 
 def close_connection(websocket): # Closes the connection
     websocket.close()
+
+async def receive(websocket): # Not tested yet but might work
+    while True:
+        message = await websocket.recv()
+        menus["chat"].print_message(2, "server", message)
+        
+        
 
 # Created by Foxy - Created at 15/06/2023
