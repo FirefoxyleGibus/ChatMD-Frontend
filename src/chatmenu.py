@@ -64,6 +64,23 @@ class ChatMenu(BaseMenu):
     def connect(self, token):
         self.websocket = connect("wss://chatmd.tanukii.dev/ws", extra_headers={"Authorization": f"Bearer {token}"})
         self.messages.append(("join", self.name))
+    
+    def print_message(self, mesType, username, content, color=0x0):
+        """
+        Appends a message to the screen
+        
+        mesType:
+            0 : join
+            1 : leave
+            2 : message
+        """
+        match mesType:
+            case 0:
+                self.messages.append(('join', username))
+            case 1:
+                self.messages.append(('leave', username))
+            case 2:
+                self.messages.append(('message', username, content))
 
 
     def __init__(self) -> None:
