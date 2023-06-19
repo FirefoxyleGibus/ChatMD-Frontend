@@ -1,6 +1,10 @@
 from blessed import *
 from blessed.keyboard import *
 
+import asyncio
+
+from src.bridge import Connection
+
 class App:
     """ Main app class """
 
@@ -13,6 +17,9 @@ class App:
 
         self.terminal = Terminal()
         self._is_running = True
+
+        self.tasks = []
+        self.websocket = Connection(self)
 
         App.instance = self
 
@@ -34,6 +41,15 @@ class App:
 
     def run(self) -> None:
         """ Run """
+        asyncio.run(self._main_loop())
+
+    async def _main_loop(self):
+        self.tasks = [
+            asyncio.create_task(self.websocket.run()),
+            asyncio.create_task(self._draw_screen())
+        ]
+
+    def _draw_screen(self):
         term = self.terminal
         self._is_running = True
         with term.fullscreen(), term.cbreak(), term.hidden_cursor():
@@ -42,6 +58,8 @@ class App:
                 and not self.get_menu(self.current_menu).turnOff:
                 self.draw()
                 self.handle_input()
+
+
 
     def draw(self):
         """ Show the current menu """
@@ -55,6 +73,9 @@ class App:
     
     def quit(self):
         """ Quit the application """
+        for task in self.tasks:
+            task.close()
+        
         try:
             self.get_menu("chat").connection.close()
         except:

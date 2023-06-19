@@ -2,52 +2,60 @@
 
 import json
 import asyncio
-from websockets import connect
-from src.app import App
+from websockets.client import connect
+
+import logging
+logging.basicConfig(level=logging.DEBUG, filename="debug_sockets.txt")
 
 class Connection():
     """ Connection abstraction layer class """
 
-    def __init__(self, url, token):
-        self.app = App.get_instance()
+    def __init__(self, app):
+        self.app = app  
+        self.status = "Offline"
         self.socket = None
-
-        self.main_task = asyncio.run(self._start(url, token))
-        
 
     def send_message(self, message):
         """ Send a message to the server """
-        self.socket.send(message)
+        if self.socket:
+            self.socket.send(message)
+        else:
+            print("Nope")
     
-    async def _start(self, url, token):
+    async def run(self):
+        """ Main entry of the program """
+        while True:
+            if self.socket:
+                await self.receive_messages()
+
+    def connect(self, url, token):
+        """ connect to a endpoint """
         print(f"Connecting at {url} ...")
-        self.socket = await connect(url, extra_headers={"Authorization": f"Bearer {token}"})
-        print("CONNECTED !")
-        await self.receive_messages()
+        self.socket = connect(url, extra_headers={"Authorization": f"Bearer {token}"})
+        return self
 
     async def receive_messages(self):
         """ Recieve messages """
         async for received_message in self.socket:
             message = json.loads(received_message)
             print(message)
-            if type(message) == list: # last posted messages
+            if isinstance(message, list): # last posted messages
                 for msg in message:
-                    self.post_chat_message("", msg["username"], msg["message"])
+                    await self.post_chat_message("", msg["username"], msg["message"])
                 continue
             # when message is just posted and we are connected
             match message["type"]:
                 case "message":
-                    self.post_chat_message("", message["data"]["username"], message["data"]["content"])
+                    await self.post_chat_message("", message["data"]["username"], message["data"]["content"])
                 case "event":
-                    self.post_chat_message(message["data"]["content"], message["data"]["username"], message["data"]["content"])
+                    await self.post_chat_message(message["data"]["content"], message["data"]["username"], message["data"]["content"])
 
-    def post_chat_message(self, msg_type, username, content) -> None:
+    async def post_chat_message(self, msg_type, username, content):
         self.app.get_menu("chat").print_message(msg_type, username, content)
-
 
     def close(self):
         """ Close the connection """
-        self.main_task.close(),
         self.socket.close()
+        self.socket = None
     
     

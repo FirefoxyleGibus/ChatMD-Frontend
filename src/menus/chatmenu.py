@@ -63,6 +63,8 @@ class ChatMenu(BaseMenu):
         print_at(terminal, 0,1, "─"*terminal.width)
         print_at(terminal, 0,terminal.height-3, "─"*terminal.width)
         print_at(terminal, terminal.width - len(lang.get("quit")),0, lang.get("quit"))
+        
+        print_at(terminal, terminal.width - len(lang.get("quit"))-10,0, self.connection.status)
 
         if self.quit_button_selected:
             print_at(terminal, terminal.width - len(lang.get("quit")) - 2, 0, terminal.blink(">"))
@@ -88,7 +90,8 @@ class ChatMenu(BaseMenu):
             self.currentlytyped, self.cursor = textbox_logic(self.currentlytyped, self.cursor, val)
 
     def connect(self, token):
-        self.connection = Connection("ws://localhost:8081",token)
+        """ Connect to the backend """
+        self.connection = App.get_instance().websocket.connect("ws://localhost:8081",token)
     
     def print_message(self, mesType, username, content, color=0x0):
         """
