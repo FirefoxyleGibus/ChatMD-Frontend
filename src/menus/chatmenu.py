@@ -1,6 +1,7 @@
-from src.basemenu import *
-from src.user_prefs.user_settings import *
 from websockets import connect
+
+from src.menus.basemenu import *
+from src.user_prefs.user_settings import *
 from src.bridge import *
 
 # ---------------------------
@@ -13,51 +14,57 @@ from src.bridge import *
 # /!\ DON'T FORGET TO CLOSE THE CONNECTION /!\
 
 class ChatMenu(BaseMenu):
+    """ Chat menu """
     currentlytyped = ""
     name = "#Guigui"
     color = 0x17ff67
     channel = "general"
     messages = [
-#         ('join', "[null]"),
-#         ('message', "[null]", "sup you motherfuckers it's me null the one and only now cry about it hahahahaha, now check this out im gonna make this text multiline and you can't do shit about it"),
-#         ('leave', "[null]")
+    #   ('join', "[null]"),
+    #   ('message', "[null]", "sup you motherfuckers it's me null the one and only now cry about it hahahahaha, now check this out im gonna make this text multiline and you can't do shit about it"),
+    #   ('leave', "[null]")
     ]
     cursor = 0
-    def draw_messages(self):
+
+    def __init__(self):
+        super().__init__("chat")
+        self.websocket = None
+
+    def _draw_messages(self, terminal):
         locale = UserSettings.get_current().get_locale()
         curmsg = len(self.messages)-1
-        msgdrawpos = term.height-4
+        msgdrawpos = terminal.height-4
         while msgdrawpos > 2 and curmsg >= 0:
             nowmsg = self.messages[curmsg]
             match nowmsg[0]:
                 case 'message':
                     usrw = len(f"{nowmsg[1]}: ")
-                    maxw = term.width - usrw
-                    lineAmount = round((len(nowmsg[2]) / maxw)+0.5)
-                    print_at(0,msgdrawpos-(lineAmount-1),f"{nowmsg[1]}: ")
-                    for i in range(lineAmount):
-                        print_at(usrw,msgdrawpos-(lineAmount-1)+i,nowmsg[2][i*maxw:(i+1)*maxw])
-                    msgdrawpos-=lineAmount
+                    maxw = terminal.width - usrw
+                    line_amount = round((len(nowmsg[2]) / maxw)+0.5)
+                    print_at(terminal, 0,msgdrawpos-(line_amount-1),f"{nowmsg[1]}: ")
+                    for i in range(line_amount):
+                        print_at(terminal, usrw,msgdrawpos-(line_amount-1)+i,nowmsg[2][i*maxw:(i+1)*maxw])
+                    msgdrawpos-=line_amount
                 case 'join':
-                    print_at(0, msgdrawpos, term.green("[+]") + f" {locale.get('welcome')}, {term.bold(nowmsg[1])}!")
+                    print_at(terminal, 0, msgdrawpos, terminal.green("[+]") + f" {locale.get('welcome')}, {terminal.bold(nowmsg[1])}!")
                     msgdrawpos-=1
                 case 'leave':
-                    print_at(0, msgdrawpos, term.red("[-]") + f" {locale.get('goodbye')}, {term.bold(nowmsg[1])}!")
+                    print_at(terminal, 0, msgdrawpos, terminal.red("[-]") + f" {locale.get('goodbye')}, {terminal.bold(nowmsg[1])}!")
                     msgdrawpos-=1
             curmsg -= 1
 
-    def draw(self) -> None:
-        print_at(0, term.height-2, ">>> " + self.currentlytyped + term.clear_eol)
-        print_at(1,0,f"#{self.channel}")
-        print_at(0,1, "─"*term.width)
-        print_at(0,term.height-3, "─"*term.width)
-        self.draw_messages()
+    def draw(self, terminal) -> None:
+        print_at(terminal, 0, terminal.height-2, ">>> " + self.currentlytyped + terminal.clear_eol)
+        print_at(terminal, 1,0,f"#{self.channel}")
+        print_at(terminal, 0,1, "─"*terminal.width)
+        print_at(terminal, 0,terminal.height-3, "─"*terminal.width)
+        self._draw_messages(terminal)
 
-    def handle_input(self):
-        val = super().handle_input()
+    def handle_input(self, terminal):
+        val = super().handle_input(terminal)
         if val.name == "KEY_ENTER" and self.currentlytyped != "":
             self.messages.append(('message', self.name, self.currentlytyped))
-            print(term.clear)
+            print(terminal.clear)
             self.currentlytyped = ""
         else:
             self.currentlytyped, self.cursor = textbox_logic(self.currentlytyped, self.cursor, val)
@@ -67,16 +74,16 @@ class ChatMenu(BaseMenu):
         receive(self.websocket)
         self.messages.append(("join", self.name))
     
-    def print_message(self, mesType, username, content, color=0x0):
+    def print_message(self, message_type, username, content, color=0x0):
         """
         Appends a message to the screen
         
-        mesType:
+        message_type:
             0 : join
             1 : leave
             2 : message
         """
-        match mesType:
+        match message_type:
             case 0:
                 self.messages.append(('join', username))
             case 1:
@@ -84,6 +91,3 @@ class ChatMenu(BaseMenu):
             case 2:
                 self.messages.append(('message', username, content))
 
-
-    def __init__(self) -> None:
-        super().__init__()
