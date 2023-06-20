@@ -40,14 +40,15 @@ class ChatMenu(BaseMenu):
                     maxw = terminal.width - usrw
                     line_amount = round((len(nowmsg[2]) / maxw)+0.5)
                     print_at(terminal, 0,msgdrawpos-(line_amount-1),f"{nowmsg[1]}: ")
+                    col = terminal.normal if nowmsg[3] != -1 else terminal.grey50
                     for i in range(line_amount):
-                        print_at(terminal, usrw,msgdrawpos-(line_amount-1)+i,nowmsg[2][i*maxw:(i+1)*maxw])
+                        print_at(terminal, usrw, msgdrawpos-(line_amount-1)+i, col + nowmsg[2][i*maxw:(i+1)*maxw] + terminal.clear_eol() + terminal.normal)
                     msgdrawpos-=line_amount
                 case 'join':
-                    print_at(terminal, 0, msgdrawpos, terminal.green("[+]") + f" {locale.get('welcome')}, {terminal.bold(nowmsg[1])}!")
+                    print_at(terminal, 0, msgdrawpos, terminal.green("[+] ") + locale.get('welcome').format(user = terminal.bold(nowmsg[1])) + terminal.clear_eol())
                     msgdrawpos-=1
                 case 'leave':
-                    print_at(terminal, 0, msgdrawpos, terminal.red("[-]") + f" {locale.get('goodbye')}, {terminal.bold(nowmsg[1])}!")
+                    print_at(terminal, 0, msgdrawpos, terminal.red("[-] ") + locale.get('goodbye').format(user = terminal.bold(nowmsg[1])) + terminal.clear_eol())
                     msgdrawpos-=1
             curmsg -= 1
 
@@ -72,13 +73,13 @@ class ChatMenu(BaseMenu):
         val = super().handle_input(terminal)
         if val.name == "KEY_ENTER":
             if self.currentlytyped != "":
-                self.messages.append(('message', self.name, self.currentlytyped))
+                self.messages.append(('message', self.name, self.currentlytyped, -1))
                 print(terminal.clear)
                 self.connection.send_message(self.currentlytyped)
                 self.currentlytyped = ""
             elif self.quit_button_selected:
                 App.get_instance().quit()
-        if val.name in ("KEY_DOWN", "KEY_UP"):
+        elif val.name in ("KEY_DOWN", "KEY_UP"):
             print(terminal.clear)
             self.quit_button_selected = not self.quit_button_selected
         else:
@@ -88,7 +89,7 @@ class ChatMenu(BaseMenu):
         """ Connect to the backend """
         self.connection = App.get_instance().websocket.connect("ws://localhost:8081",token)
 
-    def print_message(self, message_type, username, content, _color=0x0):
+    def print_message(self, message_type, username, content, at, _color=0x0):
         """
         Appends a message to the screen
         
@@ -99,8 +100,10 @@ class ChatMenu(BaseMenu):
         """
         match message_type:
             case "Join":
-                self.messages.append(('join', username))
+                self.messages.append(('join', username, at))
             case "Leave":
-                self.messages.append(('leave', username))
+                self.messages.append(('leave', username, at))
             case _:
-                self.messages.append(('message', username, content))
+                if ('message', username, content, -1) in self.messages:
+                    self.messages.remove(('message', username, content, -1))
+                self.messages.append(('message', username, content, at))

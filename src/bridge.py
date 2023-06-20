@@ -2,6 +2,7 @@
 
 import json
 import asyncio
+import time
 from websockets import connect, ConnectionClosed, WebSocketCommonProtocol
 
 import logging
@@ -21,7 +22,8 @@ class Connection():
     def send_message(self, message):
         """ Send a message to the server """
         if self.socket:
-            asyncio.create_task(self.socket.send(message))
+            task = asyncio.create_task(self.socket.send(message))
+            logging.debug(task) # to prevent a "Task exception was never retrieved"
         else:
             logging.error("socket is not connected")
     
@@ -51,18 +53,19 @@ class Connection():
             if isinstance(message, list): # last posted messages
                 logging.info("Recieved Last messages: %s", message)
                 for msg in message:
-                    self._post_chat_message("", msg["username"], msg["message"])
+                    self._post_chat_message("", msg["username"], msg["message"], msg["at"])
+                self.app.get_menu("chat").messages.reverse()
                 continue
             logging.info("Received message: %s", message)
             # when message is just posted and we are connected
             match message["type"]:
                 case "message":
-                    self._post_chat_message("", message["data"]["username"], message["data"]["message"])
+                    self._post_chat_message("", message["data"]["username"], message["data"]["message"], int(time.time_ns()/1000))
                 case "event":
                     self._post_chat_message(message["data"]["event"], message["data"]["username"], "")
 
-    def _post_chat_message(self, msg_type, username, content):
-        self.app.get_menu("chat").print_message(msg_type, username, content)
+    def _post_chat_message(self, msg_type, username, content, at = 0):
+        self.app.get_menu("chat").print_message(msg_type, username, content, at)
 
     def close(self):
         """ Close the connection """

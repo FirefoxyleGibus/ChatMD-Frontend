@@ -17,5 +17,5 @@ class BaseMenu():
 
     def handle_input(self, terminal) -> any:
         """ Handle inputs """
-        val = terminal.inkey(timeout=1/60)
+        val = terminal.inkey(timeout=1/60, esc_delay=0)
         return val
