@@ -3,7 +3,7 @@
 import json
 import asyncio
 import time
-from websockets import connect, ConnectionClosed, WebSocketCommonProtocol
+from websockets import connect, ConnectionClosed
 
 import logging
 logging.basicConfig(level=logging.DEBUG, filename="debug_sockets.txt", filemode="w")

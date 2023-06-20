@@ -73,14 +73,14 @@ class ChatMenu(BaseMenu):
 
     def _draw_esc_menu(self, terminal):
         lang = App.get_instance().user_settings.get_locale()
-        for op in range(len(self.esc_buttons)):
-            prefix = terminal.blink(">") + " " + terminal.reverse if self.esc_pos == op \
+        for option,button in enumerate(self.esc_buttons):
+            prefix = terminal.blink(">") + " " + terminal.reverse if self.esc_pos == option \
                 else "  "
-            print_at(terminal, 1, op, prefix+lang.get(self.esc_buttons[op]) + " " * (terminal.width - len(lang.get(self.esc_buttons[op])) - 5) + terminal.normal)
+            print_at(terminal, 1, option, prefix+lang.get(button) + " " * (terminal.width - len(lang.get(button)) - 5) + terminal.normal)
         print_at(terminal, 0,len(self.esc_buttons), "─"*terminal.width)
 
     def draw(self, terminal) -> None:
-        lang = App.get_instance().user_settings.get_locale()
+        _lang = App.get_instance().user_settings.get_locale()
         if self.esc_menu:
             self._draw_esc_menu(terminal)
         else:
@@ -103,7 +103,7 @@ class ChatMenu(BaseMenu):
                 self.esc_pos += {"KEY_DOWN":1, "KEY_UP": -1}[val.name]
                 self.esc_pos %= len(self.esc_buttons)
             elif val.name == "KEY_ENTER":
-                pass #TODO: THE BUTTONS
+                # pass # TODO: THE BUTTONS
                 self._execute_esc_button(self.esc_buttons[self.esc_pos], terminal)
         else:
             if val.name == "KEY_ENTER":

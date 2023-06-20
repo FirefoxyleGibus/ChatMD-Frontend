@@ -60,7 +60,6 @@ class App:
             print(term.clear)
             while self._is_running \
                 and not self.get_menu(self.current_menu).turnOff:
-                await asyncio.sleep(.01)
                 self.draw()
                 self.handle_input()
 

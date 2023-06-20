@@ -20,7 +20,7 @@ class UserSettings:
         with open(CONFIG_FILE, 'r', encoding='utf-8') as file:
             self._content = load(file, Loader=Loader)
             file.close()
-        
+
         if not 'locale' in self._content.keys():
             self.set('locale', 'en_US')
         self._locale = Locale(self._content['locale'])
@@ -38,7 +38,7 @@ class UserSettings:
     def get(self, name, default=None) -> any:
         """ Get the settings 'name' set by this user  """
         return self._content.get(name, default)
-    
+
     def set(self, name, value):
         """ Set the settings 'name' for this user  """
         self._content[name] = value
