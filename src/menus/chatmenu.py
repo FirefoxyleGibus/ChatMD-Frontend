@@ -58,7 +58,7 @@ class ChatMenu(BaseMenu):
         print_at(terminal, 1,0,f"#{self.channel}")
         print_at(terminal, 0,1, "─"*terminal.width)
         print_at(terminal, 0,terminal.height-3, "─"*terminal.width)
-        print_at(terminal, terminal.width - len(lang.get("quit")),0, lang.get("quit"))
+        print_at(terminal, terminal.width - len(lang.get("quit")),0, terminal.red(lang.get("quit")))
         
         print_at(terminal, terminal.width - len(lang.get("quit"))-10,0, self.connection.status)
 

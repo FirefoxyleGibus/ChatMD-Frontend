@@ -68,8 +68,8 @@ class LoginMenu(BaseMenu):
                 print_at(terminal, (terminal.width-24)*0.5, terminal.height*0.5+4, terminal.normal + terminal.blink(">"))
                 print_at(terminal, (terminal.width+24)*0.5, terminal.height*0.5+4, terminal.normal + terminal.blink("<"))
             case 3:
-                print_at(terminal, (terminal.width-4)*0.5, terminal.height*0.5+6, terminal.normal + terminal.blink(">"))
-                print_at(terminal, (terminal.width+4)*0.5, terminal.height*0.5+6, terminal.normal + terminal.blink("<"))
+                print_at(terminal, (terminal.width-24)*0.5, terminal.height*0.5+6, terminal.normal + terminal.blink(">"))
+                print_at(terminal, (terminal.width+24)*0.5, terminal.height*0.5+6, terminal.normal + terminal.blink("<"))
         dt = datetime.datetime.now()
 
         print_at(terminal, 1,terminal.height-2, terminal.normal + f"Il est {dt.strftime('%H:%M:%S')}, nous sommes le {dt.strftime('%A %d %B %Y')}.")
