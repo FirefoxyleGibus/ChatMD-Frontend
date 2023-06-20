@@ -1,12 +1,12 @@
-# SHIT IS GOING DOWN
-
+import os
 import json
 import asyncio
 import time
+import logging
 from websockets import connect, ConnectionClosed
 
-import logging
-logging.basicConfig(level=logging.DEBUG, filename="debug_sockets.txt", filemode="w")
+# setup logging
+logging.basicConfig(level=logging.DEBUG, filename="debug_log.txt", filemode="w")
 
 class Connection():
     """ Connection abstraction layer class """
@@ -18,6 +18,10 @@ class Connection():
 
         self.extra_headers = {}
         self.url = ""
+
+        Connection.LOGIN_ENDPOINT = f"{os.getenv('API_HTTP_ADDRESS')}/auth/login"
+        Connection.REGISTER_ENDPOINT = f"{os.getenv('API_HTTP_ADDRESS')}/auth/register"
+        Connection.WS_ENDPOINT = f"{os.getenv('API_WS_ADDRESS')}"
 
     def send_message(self, message):
         """ Send a message to the server """

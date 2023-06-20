@@ -2,6 +2,7 @@ from blessed import *
 from blessed.keyboard import *
 
 import asyncio
+from dotenv import load_dotenv
 
 from src.bridge import Connection
 
@@ -9,6 +10,8 @@ class App:
     """ Main app class """
 
     def __init__(self):
+        load_dotenv()
+
         self.current_menu = ""
         self.menus = {}
 

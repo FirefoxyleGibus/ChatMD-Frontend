@@ -10,6 +10,7 @@ profile=Profil
 view_connected=View online users
 date_status=It's {time} on {date}
 
+wrong_credentials=Wrong credentials
 connection_fail=Failed to connect
 missing_credentials=Missing username or password
 timeout=Connection Timeout

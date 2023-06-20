@@ -121,7 +121,7 @@ class ChatMenu(BaseMenu):
 
     def connect(self, token):
         """ Connect to the backend """
-        self.connection = App.get_instance().websocket.connect("ws://localhost:8081",token)
+        self.connection = App.get_instance().websocket.connect(Connection.WS_ENDPOINT,token)
 
     def print_message(self, message_type, username, content, at, _color=0x0):
         """
