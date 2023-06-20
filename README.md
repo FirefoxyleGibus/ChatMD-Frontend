@@ -5,8 +5,11 @@
 
 ## Install
 
+You must have `python 3.10` and `pip` installed.
+
+Then you should be able to run the program, if that doesn't work try :
 > Run `pip install -r requirements.txt`
 
- ## Usage
+## Usage
 
- > Run `python index.py`
+> Run `python index.py`

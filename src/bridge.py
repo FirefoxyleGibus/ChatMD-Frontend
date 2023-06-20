@@ -1,34 +1,75 @@
-# ---------------------------
-# This scripts deals with joining the backend to the UX
-# It uses the "websocket" and "asyncio" libs
-# ---------------------------
-# The script will include I/O type functions that talk to the API
-# Example :
-#       send_message() : sends a message to the server
-#       connect() : connects to a server
-# ---------------------------
-# TO DO : Handle HTTPS creds (and that's all)
-# ---------------------------
+# SHIT IS GOING DOWN
 
 import json
 import asyncio
-from src.termutil import *
+import time
+from websockets import connect, ConnectionClosed
 
-def ping(websocket): # Sends a PING message and prints the answer !! DEBUG FUNCTION !!
-    websocket.send("PING")
-    print(websocket.recv())
+import logging
+logging.basicConfig(level=logging.DEBUG, filename="debug_sockets.txt", filemode="w")
 
-def send_message(message, websocket): # Sends a message to the server !! DOESN'T LOG ANYTHING !!
-    websocket.send(message)
+class Connection():
+    """ Connection abstraction layer class """
 
-def close_connection(websocket): # Closes the connection
-    websocket.close()
+    def __init__(self, app):
+        self.app = app  
+        self.status = "Offline"
+        self.socket = None
 
-async def receive(websocket): # Not tested yet but might work
-    while True:
-        message = await websocket.recv()
-        menus["chat"].print_message(2, "server", message)
-        
-        
+        self.extra_headers = {}
+        self.url = ""
 
-# Created by Foxy - Created at 15/06/2023
+    def send_message(self, message):
+        """ Send a message to the server """
+        if self.socket:
+            task = asyncio.create_task(self.socket.send(message))
+            logging.debug(task) # to prevent a "Task exception was never retrieved"
+        else:
+            logging.error("socket is not connected")
+    
+    async def run(self):
+        """ Main entry of the program """
+        async for self.socket in connect(self.url, extra_headers=self.extra_headers):
+            try:
+                self.status = "Online"
+                await self.receive_messages()
+            except ConnectionClosed:
+                self.status = "Offline"
+
+    def connect(self, url, token):
+        """ connect to a endpoint """
+        logging.debug("Connecting at %s ...", url)
+        self.url = url 
+        self.extra_headers = {"Authorization": f"Bearer {token}"}
+        asyncio.ensure_future(self.run())
+        return self
+
+    async def receive_messages(self):
+        """ Recieve messages """
+        logging.debug(".")
+        async for received_message in self.socket:
+            logging.debug(received_message)
+            message = json.loads(received_message)
+            if isinstance(message, list): # last posted messages
+                logging.info("Recieved Last messages: %s", message)
+                for msg in message:
+                    self._post_chat_message("", msg["username"], msg["message"], msg["at"])
+                self.app.get_menu("chat").messages.reverse()
+                continue
+            logging.info("Received message: %s", message)
+            # when message is just posted and we are connected
+            match message["type"]:
+                case "message":
+                    self._post_chat_message("", message["data"]["username"], message["data"]["message"], int(time.time_ns()/1000))
+                case "event":
+                    self._post_chat_message(message["data"]["event"], message["data"]["username"], "")
+
+    def _post_chat_message(self, msg_type, username, content, at = 0):
+        self.app.get_menu("chat").print_message(msg_type, username, content, at)
+
+    def close(self):
+        """ Close the connection """
+        self.socket.close()
+        self.socket = None
+    
+    
