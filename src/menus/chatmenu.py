@@ -27,7 +27,6 @@ class ChatMenu(BaseMenu):
 
     def __init__(self):
         super().__init__("chat")
-        self.websocket = None
 
     def _draw_messages(self, terminal):
         locale = UserSettings.get_current().get_locale()
@@ -58,15 +57,15 @@ class ChatMenu(BaseMenu):
         print_at(terminal, 1,0,f"#{self.channel}")
         print_at(terminal, 0,1, "─"*terminal.width)
         print_at(terminal, 0,terminal.height-3, "─"*terminal.width)
-        print_at(terminal, terminal.width - len(lang.get("quit")),0, terminal.red(lang.get("quit")))
-        
+        print_at(terminal, terminal.width - len(lang.get("quit")),0, terminal.reverse + terminal.red(lang.get("quit")))
+
         print_at(terminal, terminal.width - len(lang.get("quit"))-10,0, self.connection.status)
 
         if self.quit_button_selected:
             print_at(terminal, terminal.width - len(lang.get("quit")) - 2, 0, terminal.blink(">"))
         else:
             print_at(terminal, 2,terminal.height-2,terminal.blink('>'))
-        
+
         self._draw_messages(terminal)
 
     def handle_input(self, terminal):
@@ -79,7 +78,7 @@ class ChatMenu(BaseMenu):
                 self.currentlytyped = ""
             elif self.quit_button_selected:
                 App.get_instance().quit()
-        if val.name == "KEY_DOWN" or val.name == "KEY_UP":
+        if val.name in ("KEY_DOWN", "KEY_UP"):
             print(terminal.clear)
             self.quit_button_selected = not self.quit_button_selected
         else:
@@ -88,8 +87,8 @@ class ChatMenu(BaseMenu):
     def connect(self, token):
         """ Connect to the backend """
         self.connection = App.get_instance().websocket.connect("ws://localhost:8081",token)
-    
-    def print_message(self, message_type, username, content, color=0x0):
+
+    def print_message(self, message_type, username, content, _color=0x0):
         """
         Appends a message to the screen
         
@@ -103,5 +102,5 @@ class ChatMenu(BaseMenu):
                 self.messages.append(('join', username))
             case "Leave":
                 self.messages.append(('leave', username))
-            case other:
-                self.messages.append(('message', username, content))    
+            case _:
+                self.messages.append(('message', username, content))

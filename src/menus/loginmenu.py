@@ -3,10 +3,12 @@ import locale
 
 import requests
 import json
+import logging
 
 from src.menus.basemenu import BaseMenu
 from src.termutil import print_at, textbox_logic, Keystroke
 from src.app import App
+
 
 locale.setlocale(locale.LC_ALL, "")
 
@@ -20,6 +22,7 @@ class LoginMenu(BaseMenu):
 
     def __init__(self):
         super().__init__("login")
+        self.status_message = ""
 
     def login(self, username, password) -> tuple:
         # pretend there's an http request in here - Guigui
@@ -28,14 +31,19 @@ class LoginMenu(BaseMenu):
         token = "nope"
 
         if username != "" and password != "":
-            response = requests.post("http://localhost:8080/auth/login", data = {"username":username, "password":password}, timeout=5.0)
-            fullResponse = json.loads(response.text)
-            if (fullResponse["code"] == 200):
-                return 0, fullResponse["data"]["session"]
-            else:
-                return 1, ""
+            try:
+                response = requests.post("http://localhost:8080/auth/login", data = {"username":username, "password":password}, timeout=5.0)
+                fullResponse = json.loads(response.text)
+                if (fullResponse["code"] == 200):
+                    return 0, fullResponse["data"]["session"]
+                else:
+                    return 1, ""
+            except json.JSONDecodeError:
+                return 1, "json decode error"
+            except requests.exceptions.ConnectionError as err:
+                return 1, str(err)
         else:
-            return 1, ""
+            return 1, "no username and password"
 
     def register(self, username, password) -> tuple:
         if username != "" and password != "":
@@ -50,6 +58,7 @@ class LoginMenu(BaseMenu):
         lang = App.get_instance().user_settings.get_locale()
         logintext = lang.get("login") 
         print_at(terminal, (terminal.width-len(logintext))*0.5, terminal.height*0.5-5, logintext)
+        print_at(terminal, (terminal.width-len(self.status_message))*0.5, terminal.height*0.5-4, terminal.red(self.status_message))
         print_at(terminal, (terminal.width-40)*0.5, terminal.height*0.5-2, terminal.center(lang.get("username"), 40))
         print_at(terminal, (terminal.width-40)*0.5, terminal.height*0.5-1, terminal.reverse + terminal.center(self.username, 40) + terminal.normal)
         print_at(terminal, (terminal.width-40)*0.5, terminal.height*0.5+1, terminal.center(lang.get("password"), 40))
@@ -96,7 +105,11 @@ class LoginMenu(BaseMenu):
                         app.get_menu("chat").name = self.username
                         app.get_menu("chat").connect(app.token)
                         print(terminal.clear)
+                    else:
+                        self.status_message = newtoken
+                        logging.error(newtoken)
+                
             case 3:
                 if val.name == "KEY_ENTER":
-                    app = App.get_instance().quit()
+                    App.get_instance().quit()
  
