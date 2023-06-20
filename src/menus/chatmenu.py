@@ -22,8 +22,15 @@ class ChatMenu(BaseMenu):
     channel = "general"
     messages = []
     cursor = 0
-    quit_button_selected = False
     connection = None
+    esc_menu = False
+    esc_pos = 0
+    esc_buttons = [
+        "return_to_chat",
+        "profile",
+        "view_connected",
+        "quit",
+    ]
 
     def __init__(self):
         super().__init__("chat")
@@ -52,38 +59,65 @@ class ChatMenu(BaseMenu):
                     msgdrawpos-=1
             curmsg -= 1
 
+    def _execute_esc_button(self, button, terminal):
+        match button:
+            case "quit":
+                App.get_instance().quit()
+            case "profile":
+                pass
+            case "view_connected":
+                pass
+            case _:
+                self.esc_menu = False
+                print(terminal.clear)
+
+    def _draw_esc_menu(self, terminal):
+        lang = App.get_instance().user_settings.get_locale()
+        for op in range(len(self.esc_buttons)):
+            prefix = terminal.blink(">") + " " + terminal.reverse if self.esc_pos == op \
+                else "  "
+            print_at(terminal, 1, op, prefix+lang.get(self.esc_buttons[op]) + " " * (terminal.width - len(lang.get(self.esc_buttons[op])) - 5) + terminal.normal)
+        print_at(terminal, 0,len(self.esc_buttons), "─"*terminal.width)
+
     def draw(self, terminal) -> None:
         lang = App.get_instance().user_settings.get_locale()
-        print_at(terminal, 0, terminal.height-2, ">>  " + self.currentlytyped + terminal.clear_eol)
-        print_at(terminal, 1,0,f"#{self.channel}")
-        print_at(terminal, 0,1, "─"*terminal.width)
-        print_at(terminal, 0,terminal.height-3, "─"*terminal.width)
-        print_at(terminal, terminal.width - len(lang.get("quit")),0, terminal.reverse + terminal.red(lang.get("quit")))
-
-        print_at(terminal, terminal.width - len(lang.get("quit"))-10,0, self.connection.status)
-
-        if self.quit_button_selected:
-            print_at(terminal, terminal.width - len(lang.get("quit")) - 2, 0, terminal.blink(">"))
+        if self.esc_menu:
+            self._draw_esc_menu(terminal)
         else:
-            print_at(terminal, 2,terminal.height-2,terminal.blink('>'))
+            print_at(terminal, terminal.width-10,0, self.connection.status)
+            print_at(terminal, 1,0,f"#{self.channel}")
+            print_at(terminal, 0,1, "─"*terminal.width)
+        print_at(terminal, 0, terminal.height-3, "─"*terminal.width)
+        print_at(terminal, 0, terminal.height-2, ">>  " + self.currentlytyped + terminal.clear_eol)
+
 
         self._draw_messages(terminal)
 
     def handle_input(self, terminal):
         val = super().handle_input(terminal)
-        if val.name == "KEY_ENTER":
-            if self.currentlytyped != "":
-                self.messages.append(('message', self.name, self.currentlytyped, -1))
+        if self.esc_menu:
+            if val.name == "KEY_ESCAPE":
+                self.esc_menu = False
                 print(terminal.clear)
-                self.connection.send_message(self.currentlytyped)
-                self.currentlytyped = ""
-            elif self.quit_button_selected:
-                App.get_instance().quit()
-        elif val.name in ("KEY_DOWN", "KEY_UP"):
-            print(terminal.clear)
-            self.quit_button_selected = not self.quit_button_selected
+            elif val.name in ("KEY_DOWN", "KEY_UP"):
+                self.esc_pos += {"KEY_DOWN":1, "KEY_UP": -1}[val.name]
+                self.esc_pos %= len(self.esc_buttons)
+            elif val.name == "KEY_ENTER":
+                pass #TODO: THE BUTTONS
+                self._execute_esc_button(self.esc_buttons[self.esc_pos], terminal)
         else:
-            self.currentlytyped, self.cursor = textbox_logic(self.currentlytyped, self.cursor, val)
+            if val.name == "KEY_ENTER":
+                if self.currentlytyped != "":
+                    self.messages.append(('message', self.name, self.currentlytyped, -1))
+                    print(terminal.clear)
+                    self.connection.send_message(self.currentlytyped)
+                    self.currentlytyped = ""
+            elif val.name == "KEY_ESCAPE":
+                print(terminal.clear)
+                self.esc_menu = True
+                self.esc_pos = 0
+            else:
+                self.currentlytyped, self.cursor = textbox_logic(self.currentlytyped, self.cursor, val)
 
     def connect(self, token):
         """ Connect to the backend """
