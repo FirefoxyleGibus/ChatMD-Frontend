@@ -59,7 +59,7 @@ class Connection():
                 case "message":
                     self._post_chat_message("", message["data"]["username"], message["data"]["content"])
                 case "event":
-                    self._post_chat_message(message["data"]["content"], message["data"]["username"], message["data"]["content"])
+                    self._post_chat_message(message["data"]["event"], message["data"]["username"], "")
 
     def _post_chat_message(self, msg_type, username, content):
         self.app.get_menu("chat").print_message(msg_type, username, content)
