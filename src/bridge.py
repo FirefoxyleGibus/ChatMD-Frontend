@@ -33,8 +33,6 @@ class Connection():
                 await self.receive_messages()
             except ConnectionClosed:
                 self.status = "Offline"
-            except WebSocketCommonProtocol.close_connection:
-                return
 
     def connect(self, url, token):
         """ connect to a endpoint """

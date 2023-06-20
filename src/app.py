@@ -78,14 +78,14 @@ class App:
     
     def quit(self):
         """ Quit the application """
-        if self.loop:
-            self.loop.stop()
-
         self._is_running = False
         try:
             self.websocket.close()
         except:
             pass
+
+        if self.loop:
+            self.loop.stop()
 
     @staticmethod
     def get_instance():
