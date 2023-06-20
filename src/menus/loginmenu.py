@@ -1,16 +1,12 @@
 import datetime
-import locale
 
-import requests
 import json
-import logging
+import requests
 
 from src.menus.basemenu import BaseMenu
 from src.termutil import print_at, textbox_logic, Keystroke
 from src.app import App
-
-
-locale.setlocale(locale.LC_ALL, "")
+from src.menus.loginexception import LoginException
 
 class LoginMenu(BaseMenu):
     """ Login menu """
@@ -24,33 +20,34 @@ class LoginMenu(BaseMenu):
         super().__init__("login")
         self.status_message = ""
 
-    def login(self, username, password) -> tuple:
-        # pretend there's an http request in here - Guigui
-        # Yeah let's just pretend - Foxy
-
-        token = "nope"
-
-        if username != "" and password != "":
+    def login(self, username, password) -> str:
+        """ Log in with a username and a password """
+        if username.rstrip() != "" and password.rstrip() != "":
             try:
                 response = requests.post("http://localhost:8080/auth/login", data = {"username":username, "password":password}, timeout=5.0)
-                fullResponse = json.loads(response.text)
-                if (fullResponse["code"] == 200):
-                    return 0, fullResponse["data"]["session"]
-                else:
-                    return 1, ""
+                full_response = json.loads(response.text)
+                match full_response["code"]:
+                    case 200:
+                        return full_response["data"]["session"]
+                    case 404:
+                        raise LoginException("not_found")
             except json.JSONDecodeError:
-                return 1, "json decode error"
-            except requests.exceptions.ConnectionError as err:
-                return 1, str(err)
-        else:
-            return 1, "no username and password"
+                raise LoginException("connection_fail")
+            except requests.exceptions.Timeout:
+                raise LoginException("timeout")
+            except requests.exceptions.TooManyRedirects:
+                raise LoginException("connection_fail")
+            except requests.exceptions.RequestException:
+                raise LoginException("connection_fail")
+        raise LoginException("missing_credentials")
 
     def register(self, username, password) -> tuple:
+        """ Register a new user """
         if username != "" and password != "":
             response = requests.post("http://localhost:8080/auth/register", data={"username": username, "password": password}, timeout=5.0)
-            fullResponse = json.loads(response.text)
-            if (fullResponse["code"] == 200):
-                return 0, fullResponse["data"]["session"]
+            full_response = json.loads(response.text)
+            if (full_response["code"] == 200):
+                return 0, full_response["data"]["session"]
             return 1, "token"
         return 1, ""
 
@@ -79,13 +76,15 @@ class LoginMenu(BaseMenu):
             case 3:
                 print_at(terminal, (terminal.width-24)*0.5, terminal.height*0.5+6, terminal.normal + terminal.blink(">"))
                 print_at(terminal, (terminal.width+24)*0.5, terminal.height*0.5+6, terminal.normal + terminal.blink("<"))
-        dt = datetime.datetime.now()
+        date = datetime.datetime.now()
 
-        print_at(terminal, 1,terminal.height-2, terminal.normal + f"Il est {dt.strftime('%H:%M:%S')}, nous sommes le {dt.strftime('%A %d %B %Y')}.")
+        date_message = lang.get('date_status').format(time=date.strftime('%H:%M:%S'), date=date.strftime('%A %d %B %Y'))
+        print_at(terminal, 1,terminal.height-2, terminal.normal + date_message)
 
 
     def handle_input(self, terminal) -> None:
         val:Keystroke = super().handle_input(terminal)
+        lang = App.get_instance().user_settings.get_locale()
         if val.name in ["KEY_UP", "KEY_DOWN"]:
             self.selec += {"KEY_UP":-1, "KEY_DOWN":1}[val.name]
             self.selec %= self.maxoptions
@@ -97,19 +96,20 @@ class LoginMenu(BaseMenu):
                 self.password, self.cursorPos[1] = textbox_logic(self.password, self.cursorPos[1], val)
             case 2:
                 if val.name == "KEY_ENTER":
-                    coderesult, newtoken = self.login(self.username, self.password)
-                    if coderesult == 0:
+                    try:
+                        newtoken = self.login(self.username, self.password)
+                        print(terminal.clear)
+                        self.status_message = ""
                         app = App.get_instance()
                         app.token = newtoken
                         app.show_menu("chat")
                         app.get_menu("chat").name = self.username
                         app.get_menu("chat").connect(app.token)
+                    except LoginException as err:
                         print(terminal.clear)
-                    else:
-                        self.status_message = newtoken
-                        logging.error(newtoken)
-                
+                        self.status_message = lang.get(err.get_failure())
+
             case 3:
                 if val.name == "KEY_ENTER":
                     App.get_instance().quit()
- 
+

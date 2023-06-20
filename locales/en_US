@@ -8,3 +8,8 @@ quit=Quit
 return_to_chat=Return to discussion
 profile=Profil
 view_connected=View online users
+date_status=It's {time} on {date}
+
+connection_fail=Failed to connect
+missing_credentials=Missing username or password
+timeout=Connection Timeout

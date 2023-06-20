@@ -1,10 +1,18 @@
 login=Salut !
-username=Nom d'utilisateur
-password=Mot de passe
-connect=Se Connecter
+
 welcome=Bienvenu.e, {user} !
 goodbye=Au revoir, {user} !
+
+username=Nom d'utilisateur
+password=Mot de passe
+date_status=Il est {time} ce {date}
+
+connect=Se Connecter
 quit=Quitter
 return_to_chat=Revenir à la conversation
 profile=Profil
 view_connected=Voir utilisateurs connectés
+
+connection_fail=Erreur lors de la connexion
+missing_credentials=Il manque le nom d'utilisateur ou le mot de passe
+timeout=La connexion a depassé le temps d'attente 

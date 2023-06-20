@@ -1,3 +1,4 @@
+import locale
 
 class Locale:
     """ Languages translation """
@@ -9,8 +10,13 @@ class Locale:
             f.close()
         
         for line in data:
-            var,traduction = line.split('=')
-            self._words[var] = traduction.rstrip()
+            if line.rstrip().lstrip() != "":
+                var,traduction = line.split('=')
+                self._words[var] = traduction.rstrip()
+
+        locale.setlocale(locale.LC_ALL, '')
+
+        
             
     def get(self, word):
         """ Get the translated word in this locale or the original word """
