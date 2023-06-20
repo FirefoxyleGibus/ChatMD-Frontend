@@ -93,6 +93,7 @@ class LoginMenu(BaseMenu):
                         app = App.get_instance()
                         app.token = newtoken
                         app.show_menu("chat")
+                        app.get_menu("chat").name = self.username
                         app.get_menu("chat").connect(app.token)
                         print(terminal.clear)
             case 3:

@@ -1,10 +1,11 @@
+import datetime
+import asyncio
+
 from src.user_prefs.user_settings import UserSettings
 from src.app import App
-
 from src.menus.chatmenu import ChatMenu
 from src.menus.loginmenu import LoginMenu
 
-import datetime
 
 def main():
     app = App()
@@ -15,8 +16,6 @@ def main():
     app.register_menu(ChatMenu())
 
     # Start on login menu
-    _coderesult, newtoken = app.get_menu("login").login("test", "test")
-    app.get_menu("chat").connect(newtoken)
-    app.show_menu("chat")
+    app.show_menu("login")
 
     app.run()

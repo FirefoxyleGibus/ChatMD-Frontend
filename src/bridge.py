@@ -2,10 +2,10 @@
 
 import json
 import asyncio
-from websockets.client import connect
+from websockets import connect, ConnectionClosed, WebSocketCommonProtocol
 
 import logging
-logging.basicConfig(level=logging.DEBUG, filename="debug_sockets.txt")
+logging.basicConfig(level=logging.DEBUG, filename="debug_sockets.txt", filemode="w")
 
 class Connection():
     """ Connection abstraction layer class """
@@ -15,42 +15,55 @@ class Connection():
         self.status = "Offline"
         self.socket = None
 
+        self.extra_headers = {}
+        self.url = ""
+
     def send_message(self, message):
         """ Send a message to the server """
         if self.socket:
             self.socket.send(message)
         else:
-            print("Nope")
+            logging.error("socket is not connected")
     
     async def run(self):
         """ Main entry of the program """
-        while True:
-            if self.socket:
+        async for self.socket in connect(self.url, extra_headers=self.extra_headers):
+            try:
+                self.status = "Online"
                 await self.receive_messages()
+            except ConnectionClosed:
+                self.status = "Offline"
+            except WebSocketCommonProtocol.close_connection:
+                return
 
     def connect(self, url, token):
         """ connect to a endpoint """
-        print(f"Connecting at {url} ...")
-        self.socket = connect(url, extra_headers={"Authorization": f"Bearer {token}"})
+        logging.debug("Connecting at %s ...", url)
+        self.url = url 
+        self.extra_headers = {"Authorization": f"Bearer {token}"}
+        asyncio.ensure_future(self.run())
         return self
 
     async def receive_messages(self):
         """ Recieve messages """
+        logging.debug(".")
         async for received_message in self.socket:
+            logging.debug(received_message)
             message = json.loads(received_message)
-            print(message)
             if isinstance(message, list): # last posted messages
+                logging.info("Recieved Last messages: %s", message)
                 for msg in message:
-                    await self.post_chat_message("", msg["username"], msg["message"])
+                    self._post_chat_message("", msg["username"], msg["message"])
                 continue
+            logging.info("Received message: %s", message)
             # when message is just posted and we are connected
             match message["type"]:
                 case "message":
-                    await self.post_chat_message("", message["data"]["username"], message["data"]["content"])
+                    self._post_chat_message("", message["data"]["username"], message["data"]["content"])
                 case "event":
-                    await self.post_chat_message(message["data"]["content"], message["data"]["username"], message["data"]["content"])
+                    self._post_chat_message(message["data"]["content"], message["data"]["username"], message["data"]["content"])
 
-    async def post_chat_message(self, msg_type, username, content):
+    def _post_chat_message(self, msg_type, username, content):
         self.app.get_menu("chat").print_message(msg_type, username, content)
 
     def close(self):

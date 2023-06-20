@@ -18,7 +18,7 @@ class App:
         self.terminal = Terminal()
         self._is_running = True
 
-        self.tasks = []
+        self.loop = None
         self.websocket = Connection(self)
 
         App.instance = self
@@ -39,23 +39,28 @@ class App:
         return self.menus.get(menu_name)
 
 
-    def run(self) -> None:
+    def run(self):
         """ Run """
-        asyncio.run(self._main_loop())
+        print("Application starting")
+        self.loop = asyncio.get_event_loop()
+        try:
+            asyncio.ensure_future(self._draw_screen())
+            self.loop.run_forever()
+        except KeyboardInterrupt:
+            pass
+        finally:
+            print("Closing Loop")
+            self.loop.close()
+        print("Application ended")
 
-    async def _main_loop(self):
-        self.tasks = [
-            asyncio.create_task(self.websocket.run()),
-            asyncio.create_task(self._draw_screen())
-        ]
-
-    def _draw_screen(self):
+    async def _draw_screen(self):
         term = self.terminal
         self._is_running = True
         with term.fullscreen(), term.cbreak(), term.hidden_cursor():
             print(term.clear)
             while self._is_running \
                 and not self.get_menu(self.current_menu).turnOff:
+                await asyncio.sleep(.01)
                 self.draw()
                 self.handle_input()
 
@@ -73,14 +78,14 @@ class App:
     
     def quit(self):
         """ Quit the application """
-        for task in self.tasks:
-            task.close()
-        
+        if self.loop:
+            self.loop.stop()
+
+        self._is_running = False
         try:
-            self.get_menu("chat").connection.close()
+            self.websocket.close()
         except:
             pass
-        self._is_running = False
 
     @staticmethod
     def get_instance():

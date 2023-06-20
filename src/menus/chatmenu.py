@@ -20,11 +20,7 @@ class ChatMenu(BaseMenu):
     name = "#Guigui"
     color = 0x17ff67
     channel = "general"
-    messages = [
-    #   ('join', "[null]"),
-    #   ('message', "[null]", "sup you motherfuckers it's me null the one and only now cry about it hahahahaha, now check this out im gonna make this text multiline and you can't do shit about it"),
-    #   ('leave', "[null]")
-    ]
+    messages = []
     cursor = 0
     quit_button_selected = False
     connection = None
@@ -93,16 +89,16 @@ class ChatMenu(BaseMenu):
         """ Connect to the backend """
         self.connection = App.get_instance().websocket.connect("ws://localhost:8081",token)
     
-    def print_message(self, mesType, username, content, color=0x0):
+    def print_message(self, message_type, username, content, color=0x0):
         """
         Appends a message to the screen
         
-        mesType:
+        message_type:
             "Join" : join
             "Leave" : leave
             others : message
         """
-        match mesType:
+        match message_type:
             case "Join":
                 self.messages.append(('join', username))
             case "Leave":
