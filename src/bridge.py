@@ -21,7 +21,7 @@ class Connection():
     def send_message(self, message):
         """ Send a message to the server """
         if self.socket:
-            self.socket.send(message)
+            asyncio.create_task(self.socket.send(message))
         else:
             logging.error("socket is not connected")
     
@@ -57,7 +57,7 @@ class Connection():
             # when message is just posted and we are connected
             match message["type"]:
                 case "message":
-                    self._post_chat_message("", message["data"]["username"], message["data"]["content"])
+                    self._post_chat_message("", message["data"]["username"], message["data"]["message"])
                 case "event":
                     self._post_chat_message(message["data"]["event"], message["data"]["username"], "")
 
