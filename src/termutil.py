@@ -25,7 +25,7 @@ def color_text(term, text = "", beat = 0.0):
     # - r				Flips foreground and background
     # - k				Glitchifies text
 
-    text = text.replace(r"\{", "￼ø").replace(r"\}", "ŧ￼").replace("{", "�{").replace("}", "}�")
+    text = text.replace("\{", "￼ø").replace("\}", "ŧ￼").replace("{", "�{").replace("}", "}�")
     #If you are using � or "￼" genuiunely, what the #### is wrong with you /gen
     data = text.split("�")
     rendered_text = ""
