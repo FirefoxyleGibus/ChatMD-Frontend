@@ -1,6 +1,10 @@
+"""" User preferences subpackage """
+__all__ = ["locales", "user_settings"]
+
 import os
 import sys
 import subprocess
+
 
 CONFIG_FILE = 'user_settings.yml'
 
