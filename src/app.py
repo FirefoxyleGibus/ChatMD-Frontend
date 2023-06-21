@@ -1,3 +1,5 @@
+import logging
+
 from blessed import *
 from blessed.keyboard import *
 
@@ -5,6 +7,9 @@ import asyncio
 from dotenv import load_dotenv
 
 from src.bridge import Connection
+
+# setup logging
+logging.basicConfig(level=logging.DEBUG, filename="debug_log.txt", filemode="w")
 
 class App:
     """ Main app class """

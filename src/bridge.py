@@ -5,9 +5,6 @@ import time
 import logging
 from websockets import connect, ConnectionClosed
 
-# setup logging
-logging.basicConfig(level=logging.DEBUG, filename="debug_log.txt", filemode="w")
-
 class Connection():
     """ Connection abstraction layer class """
 
