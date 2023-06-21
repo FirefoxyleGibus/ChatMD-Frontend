@@ -6,7 +6,6 @@ from src.app import App
 from src.menus.chatmenu import ChatMenu
 from src.menus.loginmenu import LoginMenu
 
-
 def main():
     app = App()
     app.user_settings = UserSettings()

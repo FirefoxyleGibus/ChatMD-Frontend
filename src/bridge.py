@@ -1,12 +1,12 @@
-# SHIT IS GOING DOWN
-
+import os
 import json
 import asyncio
 import time
+import logging
 from websockets import connect, ConnectionClosed
 
-import logging
-logging.basicConfig(level=logging.DEBUG, filename="debug_sockets.txt", filemode="w")
+# setup logging
+logging.basicConfig(level=logging.DEBUG, filename="debug_log.txt", filemode="w")
 
 class Connection():
     """ Connection abstraction layer class """
@@ -19,6 +19,10 @@ class Connection():
         self.extra_headers = {}
         self.url = ""
 
+        Connection.LOGIN_ENDPOINT = f"{os.getenv('API_HTTP_ADDRESS')}/auth/login"
+        Connection.REGISTER_ENDPOINT = f"{os.getenv('API_HTTP_ADDRESS')}/auth/register"
+        Connection.WS_ENDPOINT = f"{os.getenv('API_WS_ADDRESS')}"
+
     def send_message(self, message):
         """ Send a message to the server """
         if self.socket:
@@ -29,6 +33,7 @@ class Connection():
     
     async def run(self):
         """ Main entry of the program """
+        logging.debug("Connecting to WS : %s", self.url)
         async for self.socket in connect(self.url, extra_headers=self.extra_headers):
             try:
                 self.status = "Online"
@@ -41,7 +46,9 @@ class Connection():
         logging.debug("Connecting at %s ...", url)
         self.url = url 
         self.extra_headers = {"Authorization": f"Bearer {token}"}
+        logging.debug("TOKEN : %s", token)
         asyncio.ensure_future(self.run())
+        logging.debug("Running bridge")
         return self
 
     async def receive_messages(self):

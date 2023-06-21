@@ -2,11 +2,13 @@ import datetime
 
 import json
 import requests
+import logging
 
 from src.menus.basemenu import BaseMenu
 from src.termutil import print_at, textbox_logic, Keystroke
 from src.app import App
 from src.menus.loginexception import LoginException
+from src.bridge import Connection
 
 class LoginMenu(BaseMenu):
     """ Login menu """
@@ -24,13 +26,20 @@ class LoginMenu(BaseMenu):
         """ Log in with a username and a password """
         if username.rstrip() != "" and password.rstrip() != "":
             try:
-                response = requests.post("http://localhost:8080/auth/login", data = {"username":username, "password":password}, timeout=5.0)
+                response = requests.post(Connection.LOGIN_ENDPOINT, data = {"username":username, "password":password}, timeout=5.0)
                 full_response = json.loads(response.text)
                 match full_response["code"]:
                     case 200:
                         return full_response["data"]["session"]
                     case 404:
                         raise LoginException("not_found")
+                    case 418: # unknown user
+                        raise LoginException("wrong_credentials")
+                    case 401:
+                        raise LoginException("wrong_credentials")
+                    case _:
+                        logging.error("Failed to connect: %d", full_response["code"])
+                        raise LoginException("connection_fail")
             except json.JSONDecodeError:
                 raise LoginException("connection_fail")
             except requests.exceptions.Timeout:
@@ -44,7 +53,7 @@ class LoginMenu(BaseMenu):
     def register(self, username, password) -> tuple:
         """ Register a new user """
         if username != "" and password != "":
-            response = requests.post("http://localhost:8080/auth/register", data={"username": username, "password": password}, timeout=5.0)
+            response = requests.post(Connection.REGISTER_ENDPOINT, data={"username": username, "password": password}, timeout=5.0)
             full_response = json.loads(response.text)
             if (full_response["code"] == 200):
                 return 0, full_response["data"]["session"]
@@ -53,7 +62,7 @@ class LoginMenu(BaseMenu):
 
     def draw(self, terminal) -> None:
         lang = App.get_instance().user_settings.get_locale()
-        logintext = lang.get("login") 
+        logintext = lang.get("login")
         print_at(terminal, (terminal.width-len(logintext))*0.5, terminal.height*0.5-5, logintext)
         print_at(terminal, (terminal.width-len(self.status_message))*0.5, terminal.height*0.5-4, terminal.red(self.status_message))
         print_at(terminal, (terminal.width-40)*0.5, terminal.height*0.5-2, terminal.center(lang.get("username"), 40))

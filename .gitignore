@@ -154,5 +154,7 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
+# our files to ignore
+
 user_settings.yml
-debug_sockets.txt
+debug_*.txt

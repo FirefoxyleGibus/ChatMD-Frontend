@@ -13,6 +13,7 @@ return_to_chat=Revenir à la conversation
 profile=Profil
 view_connected=Voir utilisateurs connectés
 
+wrong_credentials=Mauvais identifiants
 connection_fail=Erreur lors de la connexion
 missing_credentials=Il manque le nom d'utilisateur ou le mot de passe
 timeout=La connexion a depassé le temps d'attente 

@@ -35,11 +35,11 @@ class ChatMenu(BaseMenu):
     def __init__(self):
         super().__init__("chat")
 
-    def _draw_messages(self, terminal):
+    def _draw_messages(self, terminal, max_message_draw_pos=2):
         locale = UserSettings.get_current().get_locale()
         curmsg = len(self.messages)-1
         msgdrawpos = terminal.height-4
-        while msgdrawpos > 2 and curmsg >= 0:
+        while msgdrawpos > max_message_draw_pos and curmsg >= 0:
             nowmsg = self.messages[curmsg]
             match nowmsg[0]:
                 case 'message':
@@ -81,17 +81,19 @@ class ChatMenu(BaseMenu):
 
     def draw(self, terminal) -> None:
         _lang = App.get_instance().user_settings.get_locale()
+        
         if self.esc_menu:
             self._draw_esc_menu(terminal)
+            self._draw_messages(terminal, len(self.esc_buttons))
         else:
+            self._draw_messages(terminal)
             print_at(terminal, terminal.width-10,0, self.connection.status)
             print_at(terminal, 1,0,f"#{self.channel}")
             print_at(terminal, 0,1, "─"*terminal.width)
         print_at(terminal, 0, terminal.height-3, "─"*terminal.width)
-        print_at(terminal, 0, terminal.height-2, ">>  " + self.currentlytyped + terminal.clear_eol)
+        print_at(terminal, 0, terminal.height-2, ">>> " + self.currentlytyped + terminal.clear_eol)
 
 
-        self._draw_messages(terminal)
 
     def handle_input(self, terminal):
         val = super().handle_input(terminal)
@@ -121,7 +123,7 @@ class ChatMenu(BaseMenu):
 
     def connect(self, token):
         """ Connect to the backend """
-        self.connection = App.get_instance().websocket.connect("ws://localhost:8081",token)
+        self.connection = App.get_instance().websocket.connect(Connection.WS_ENDPOINT,token)
 
     def print_message(self, message_type, username, content, at, _color=0x0):
         """
