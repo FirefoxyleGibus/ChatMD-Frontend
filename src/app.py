@@ -94,3 +94,8 @@ class App:
     def get_instance():
         """ Return the app instance """
         return App.instance
+
+    @staticmethod
+    def get_locale():
+        """ Return the locale of the app instance """
+        return App.get_instance().user_settings.get_locale()
