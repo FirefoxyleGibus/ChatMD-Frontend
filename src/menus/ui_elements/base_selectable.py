@@ -16,33 +16,61 @@ class BaseSelectable():
         self._attachments = {}
         self._is_selected = False
 
-        if not attachments is None:
-            for side, element in enumerate(attachments):
-                self.connect_side(side, element)
+        if attachments:
+            for side in attachments:
+                self.connect_side(side, attachments[side])
 
     def select(self) -> None:
         """ Select this element """
         self._is_selected = True
+    
+    def deselect(self) -> None:
+        """ Deselect this element (block user navigation to connected elements) """
+        self._is_selected = False
+
+    @property
+    def is_selected(self) -> bool:
+        """ Return true if this button is selected """
+        return self._is_selected
 
     def connect_side(self, side: str, element) -> None:
         """ Connect a button to a side """
         if side in self.SIDES:
             self._attachments[self.SIDES[side]] = element
 
-    def handle_inputs(self, val: Keystroke) -> None:
-        """ Handle inputs """
-        match val:
+    def handle_inputs(self, val: Keystroke, terminal: Terminal):
+        """ 
+        Handle inputs and return the
+        new selected object
+
+        :rtype: BaseSelectable
+        :returns: Return the new selected item (can be itself)
+        
+        """
+        ret = self
+        match val.name:
             case "KEY_DOWN":
-                self._attachments.get(self.SIDES['down'], self).select()
+                self.deselect()
+                ret = self._attachments.get(self.SIDES['down'], self)
+                ret.select()
+                print(terminal.clear)
             case "KEY_UP":
-                self._attachments.get(self.SIDES['up'], self).select()
+                self.deselect()
+                ret = self._attachments.get(self.SIDES['up'], self)
+                ret.select()
+                print(terminal.clear)
             case "KEY_LEFT":
-                self._attachments.get(self.SIDES['left'], self).select()
+                self.deselect()
+                ret = self._attachments.get(self.SIDES['left'], self)
+                ret.select()
+                print(terminal.clear)
             case "KEY_RIGHT":
-                self._attachments.get(self.SIDES['right'], self).select()
-        return val
+                self.deselect()
+                ret = self._attachments.get(self.SIDES['right'], self)
+                ret.select()
+                print(terminal.clear)
+        return ret
 
     def draw(self, terminal: Terminal, pos_x: int, pos_y: int):
         """ Draw the element """
         pass
-
