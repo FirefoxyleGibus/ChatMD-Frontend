@@ -45,12 +45,12 @@ class ChatMenu(BaseMenu):
                 case 'message':
                     usrw = len(f"{nowmsg[1]}: ")
                     maxw = terminal.width - usrw
-                    line_amount = round((len(nowmsg[2]) / maxw)+0.5)
-                    print_at(terminal, 0,msgdrawpos-(line_amount-1),f"{terminal.bold(nowmsg[1])}: ")
+                    coltxt = color_text(terminal, nowmsg[2])
+                    line_amount = round((len(terminal.strip_seqs(coltxt)) / maxw)+0.5)
                     col = terminal.normal if nowmsg[3] != -1 else terminal.grey50
-                    for i in range(line_amount):
-                        print_at(terminal, usrw, msgdrawpos-(line_amount-1)+i, col + nowmsg[2][i*maxw:(i+1)*maxw] + terminal.clear_eol() + terminal.normal)
-                    msgdrawpos-=line_amount
+                    print_at(terminal, 0,msgdrawpos-line_amount+1,col + terminal.bold(nowmsg[1]) + col + ": ")
+                    print_at(terminal, usrw, msgdrawpos-line_amount+1, terminal.ljust(col + coltxt, int(terminal.width-usrw)) + terminal.normal + terminal.clear_eol())
+                    msgdrawpos-=max(1, line_amount)
                 case 'join':
                     print_at(terminal, 0, msgdrawpos, terminal.green("[+] ") + locale.get('welcome').format(user = terminal.bold(nowmsg[1])) + terminal.clear_eol())
                     msgdrawpos-=1
@@ -82,7 +82,7 @@ class ChatMenu(BaseMenu):
     def draw(self, terminal) -> None:
         _lang = App.get_instance().user_settings.get_locale()
         
-        line_amount = round(((len(self.currentlytyped)+4) / terminal.width)+0.5)
+        line_amount = max(round(((len(self.currentlytyped)+4) / terminal.width)+0.5), 1)
         print_at(terminal, 0, terminal.height-(2+line_amount), "─"*terminal.width)
         print_at(terminal, 0, terminal.height-(1+line_amount), ">>> " + self.currentlytyped + terminal.clear_eol)
         if self.esc_menu:
