@@ -1,9 +1,10 @@
 from websockets import connect
 
-from src.menus.basemenu import *
+from src.menus.basemenu import BaseMenu
 from src.app import App
-from src.user_prefs.user_settings import *
-from src.bridge import *
+from src.user_prefs.user_settings import UserSettings
+from src.bridge import Connection
+from src.termutil import *
 
 # ---------------------------
 # TO DO : Handle reception
