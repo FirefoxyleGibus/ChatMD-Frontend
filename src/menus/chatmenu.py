@@ -46,7 +46,7 @@ class ChatMenu(BaseMenu):
                     usrw = len(f"{nowmsg[1]}: ")
                     maxw = terminal.width - usrw
                     line_amount = round((len(nowmsg[2]) / maxw)+0.5)
-                    print_at(terminal, 0,msgdrawpos-(line_amount-1),f"{nowmsg[1]}: ")
+                    print_at(terminal, 0,msgdrawpos-(line_amount-1),f"{terminal.bold(nowmsg[1])}: ")
                     col = terminal.normal if nowmsg[3] != -1 else terminal.grey50
                     for i in range(line_amount):
                         print_at(terminal, usrw, msgdrawpos-(line_amount-1)+i, col + nowmsg[2][i*maxw:(i+1)*maxw] + terminal.clear_eol() + terminal.normal)
