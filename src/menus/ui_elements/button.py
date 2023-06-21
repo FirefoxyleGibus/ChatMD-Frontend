@@ -57,7 +57,8 @@ class Button(BaseSelectable):
                     )
             case 'right':
                 text = terminal.reverse + terminal.rjust(lang.get(self._text), self._width)
-                print_at(terminal, pos_x - self._width, pos_y, text + terminal.normal)
+                # adding +1 to have the same spaces for left and right alignemnt
+                print_at(terminal, pos_x - self._width+1, pos_y, text + terminal.normal)
                 if self._is_selected:
                     offset_x = self._SELECT_INDICATOR_MARGIN
                     print_at(terminal, \
