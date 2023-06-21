@@ -48,8 +48,12 @@ class ChatMenu(BaseMenu):
                     coltxt = color_text(terminal, nowmsg[2])
                     line_amount = round((len(terminal.strip_seqs(coltxt)) / maxw)+0.5)
                     col = terminal.normal if nowmsg[3] != -1 else terminal.grey50
-                    print_at(terminal, 0,msgdrawpos-line_amount+1,col + terminal.bold(nowmsg[1]) + col + ": ")
-                    print_at(terminal, usrw, msgdrawpos-line_amount+1, terminal.ljust(col + coltxt, int(terminal.width-usrw)) + terminal.normal + terminal.clear_eol())
+                    if msgdrawpos-line_amount+1 > max_message_draw_pos:
+                        print_at(terminal, 0,msgdrawpos-line_amount+1,col + terminal.bold(nowmsg[1]) + col + ": ")
+                        print_at(terminal, usrw, msgdrawpos-line_amount+1, terminal.ljust(col + coltxt, int(terminal.width-usrw)) + terminal.normal + terminal.clear_eol())
+                    else:
+                        text_to_crop = terminal.ljust(col + coltxt, int(terminal.width-usrw)).split("\n")
+                        print_at(terminal, usrw, max_message_draw_pos, "\n".join(text_to_crop[-((msgdrawpos-line_amount+1)-max_message_draw_pos):]))
                     msgdrawpos-=max(1, line_amount)
                 case 'join':
                     print_at(terminal, 0, msgdrawpos, terminal.green("[+] ") + locale.get('welcome').format(user = terminal.bold(nowmsg[1])) + terminal.clear_eol())
