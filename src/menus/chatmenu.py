@@ -35,10 +35,10 @@ class ChatMenu(BaseMenu):
     def __init__(self):
         super().__init__("chat")
 
-    def _draw_messages(self, terminal, max_message_draw_pos=2):
+    def _draw_messages(self, terminal, max_message_draw_pos=1, start_pos=4):
         locale = UserSettings.get_current().get_locale()
         curmsg = len(self.messages)-1
-        msgdrawpos = terminal.height-4
+        msgdrawpos = terminal.height-start_pos
         while msgdrawpos > max_message_draw_pos and curmsg >= 0:
             nowmsg = self.messages[curmsg]
             match nowmsg[0]:
@@ -82,16 +82,17 @@ class ChatMenu(BaseMenu):
     def draw(self, terminal) -> None:
         _lang = App.get_instance().user_settings.get_locale()
         
+        line_amount = round(((len(self.currentlytyped)+4) / terminal.width)+0.5)
+        print_at(terminal, 0, terminal.height-(2+line_amount), "─"*terminal.width)
+        print_at(terminal, 0, terminal.height-(1+line_amount), ">>> " + self.currentlytyped + terminal.clear_eol)
         if self.esc_menu:
             self._draw_esc_menu(terminal)
-            self._draw_messages(terminal, len(self.esc_buttons))
+            self._draw_messages(terminal, max_message_draw_pos=len(self.esc_buttons), start_pos=line_amount+3)
         else:
-            self._draw_messages(terminal)
+            self._draw_messages(terminal, start_pos=line_amount+3)
             print_at(terminal, terminal.width-10,0, self.connection.status)
             print_at(terminal, 1,0,f"#{self.channel}")
             print_at(terminal, 0,1, "─"*terminal.width)
-        print_at(terminal, 0, terminal.height-3, "─"*terminal.width)
-        print_at(terminal, 0, terminal.height-2, ">>> " + self.currentlytyped + terminal.clear_eol)
 
 
 
