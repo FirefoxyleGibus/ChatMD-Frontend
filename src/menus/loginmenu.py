@@ -62,7 +62,7 @@ class LoginMenu(BaseMenu):
 
     def draw(self, terminal) -> None:
         lang = App.get_instance().user_settings.get_locale()
-        logintext = lang.get("login") 
+        logintext = lang.get("login")
         print_at(terminal, (terminal.width-len(logintext))*0.5, terminal.height*0.5-5, logintext)
         print_at(terminal, (terminal.width-len(self.status_message))*0.5, terminal.height*0.5-4, terminal.red(self.status_message))
         print_at(terminal, (terminal.width-40)*0.5, terminal.height*0.5-2, terminal.center(lang.get("username"), 40))

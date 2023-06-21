@@ -33,7 +33,7 @@ class Connection():
     
     async def run(self):
         """ Main entry of the program """
-        logging.debug(f"Connecting to WS : {self.url}")
+        logging.debug("Connecting to WS : %s", self.url)
         async for self.socket in connect(self.url, extra_headers=self.extra_headers):
             try:
                 self.status = "Online"
@@ -46,8 +46,9 @@ class Connection():
         logging.debug("Connecting at %s ...", url)
         self.url = url 
         self.extra_headers = {"Authorization": f"Bearer {token}"}
-        logging.debug(f"TOKEN : {token}")
+        logging.debug("TOKEN : %s", token)
         asyncio.ensure_future(self.run())
+        logging.debug("Running bridge")
         return self
 
     async def receive_messages(self):
