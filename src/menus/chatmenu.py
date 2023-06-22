@@ -24,6 +24,7 @@ class ChatMenu(BaseMenu):
     color = 0x17ff67
     channel = "general"
     messages = []
+    _online_members = set()
     connection = None
     esc_menu = False
     esc_pos = 0
@@ -41,7 +42,6 @@ class ChatMenu(BaseMenu):
         self.focus_selectable(self._textbox)
         
         self._latency = 0
-        self._online_members = set()
 
     def set_latency(self, latency):
         """ Set the latency """
@@ -116,9 +116,9 @@ class ChatMenu(BaseMenu):
         else:
             self._draw_messages(terminal, start_pos=4)
             # connection status
-            latency = terminal.rjust(f"{self._latency}ms", 6)
-            print_at(terminal, terminal.width-len(self.connection.status)-len(latency)-5,0, self.connection.status)
-            print_at(terminal, terminal.width-len(latency)-5,0, latency)
+            latency = terminal.center(f"{self._latency}ms", 6)
+            topright = "   " + self.connection.status + " | " + latency + " | " + "{0} online".format(len(self._online_members))
+            print_at(terminal, terminal.width-len(topright),0, topright)
             
             print_at(terminal, 1,0,f"#{self.channel}")
             print_at(terminal, 0,1, "─"*terminal.width)

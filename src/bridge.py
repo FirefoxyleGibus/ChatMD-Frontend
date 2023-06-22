@@ -61,12 +61,14 @@ class Connection():
                 for msg in data["messages"]:
                     self._handle_new_message(msg, on_join_message=True)
                 self.app.get_menu("chat").messages.reverse()
-                continue
 
             if "online" in data:
                 logging.info("Online members: %s", data["online"])
                 for member in data["online"]:
                     self.app.get_menu("chat").add_online(member["username"])
+            
+            if "messages" in data or "online" in data:
+                continue
             
             logging.info("Received message: %s", data)
             # when message is just posted and we are connected
