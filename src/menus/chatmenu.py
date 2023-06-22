@@ -143,8 +143,16 @@ class ChatMenu(BaseMenu):
         match message_type:
             case "Join":
                 self.messages.append(('join', username, at))
+                Notify(default_notification_application_name = "ChatMD",
+                       default_notification_icon             = r"chatmd.ico",
+                       default_notification_title            = username,
+                       default_notification_message          = "just joined !").send(block=False)
             case "Leave":
                 self.messages.append(('leave', username, at))
+                Notify(default_notification_application_name = "ChatMD",
+                       default_notification_icon             = r"chatmd.ico",
+                       default_notification_title            = username,
+                       default_notification_message          = "just left !").send(block=False)
             case _:
                 if ('message', username, content, -1) in self.messages:
                     self.messages.remove(('message', username, content, -1))
