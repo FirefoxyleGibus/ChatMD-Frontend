@@ -19,6 +19,6 @@ def main():
     app.register_menu(ExampleMenu())
 
     # Start on a specific menu
-    app.show_menu("login")
+    app.show_menu("chat")
 
     app.run()

@@ -2,7 +2,7 @@
     Example menu using new ui class
 """
 
-import logging 
+import logging
 
 from src.menus.basemenu import BaseMenu
 from src.menus.ui_elements import Button, TextBox, TextBoxPassword, ElementStyle

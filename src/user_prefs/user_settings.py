@@ -36,7 +36,7 @@ class UserSettings:
 
     def get_locale(self):
         """ Get the current local of this user """
-        return self._locale 
+        return self._locale
 
     def get(self, name, default=None) -> any:
         """ Get the settings 'name' set by this user  """

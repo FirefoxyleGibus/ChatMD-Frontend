@@ -101,5 +101,5 @@ class TextBox(BaseSelectable):
                 + len(self._prefix) + offset_x + left_char_pos
             cursor_char = self._visible_text()[self._curpos] \
                 if self._curpos < len(self._visible_text()) else " "
-            print_at(terminal, cursor_pos, pos_y, 
+            print_at(terminal, cursor_pos, pos_y,
                 background + terminal.underline(cursor_char) + terminal.normal)

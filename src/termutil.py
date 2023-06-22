@@ -9,9 +9,9 @@
 
 # shamelessly stolen from HastagGuigui/shellrhythm, by HastagGuigui himself
 
-def print_at(terminal, x, y, text):
+def print_at(terminal, pos_x, pos_y, text):
     """ Print something at a position in the terminal """
-    print(terminal.move_xy(int(x), int(y)) + text)
+    print(terminal.move_xy(int(pos_x), int(pos_y)) + text)
 
 def prng (beat = 0.0, seed = 0):
     """ Random gen """ 
@@ -70,7 +70,7 @@ def color_text(term, text = "", beat = 0.0):
                 case _ if glitchify_next:
                     #this big chunk will generate a random string with characters from 0x20 to 0x7e
                     rendered_text += "".join([
-                        chr(int(prng(beat, k))%(0x7e-0x20) + 0x20) 
+                        chr(int(prng(beat, k))%(0x7e-0x20) + 0x20)
                         for k in range(len(i.replace("￼ø", "{").replace("ŧ￼", "}")))
                     ])
                 case _:
@@ -78,7 +78,7 @@ def color_text(term, text = "", beat = 0.0):
         else:
             if glitchify_next:
                 rendered_text += "".join([
-                    chr(int(prng(beat, k))%(0x7e-0x20) + 0x20) 
+                    chr(int(prng(beat, k))%(0x7e-0x20) + 0x20)
                     for k in range(len(i.replace("￼ø", "{").replace("ŧ￼", "}")))
                 ])
             else:

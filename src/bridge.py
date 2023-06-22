@@ -11,7 +11,7 @@ class Connection():
     """ Connection abstraction layer class """
 
     def __init__(self, app):
-        self.app = app  
+        self.app = app
         self.status = "Offline"
         self.socket = None
 
@@ -43,7 +43,7 @@ class Connection():
     def connect(self, url, token):
         """ connect to a endpoint """
         logging.debug("Connecting at %s ...", url)
-        self.url = url 
+        self.url = url
         self.extra_headers = {"Authorization": f"Bearer {token}"}
         logging.debug("TOKEN : %s", token)
         asyncio.ensure_future(self.run())
@@ -84,7 +84,7 @@ class Connection():
                 self.app.get_menu("chat").print_message(msg_type,
                     data["username"], data["message"], data["at"], _preload = on_join_message)
             case "event":
-                self.app.get_menu("chat").print_message(data["event"], 
+                self.app.get_menu("chat").print_message(data["event"],
                     data["username"], "", data["at"], _preload = on_join_message)
             case "latency":
                 self.app.get_menu("chat").set_latency(data["latency_ms"])

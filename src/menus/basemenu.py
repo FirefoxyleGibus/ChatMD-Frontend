@@ -15,7 +15,7 @@ class BaseMenu():
     def get_name(self) -> str:
         """ Return the name of this menu """
         return self._name
-    
+
     def focus_selectable(self, selectable: BaseSelectable):
         """ Register a selectable element """
         if not selectable is None:

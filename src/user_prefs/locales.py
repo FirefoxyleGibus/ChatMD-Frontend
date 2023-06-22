@@ -15,9 +15,9 @@ class Locale:
     def reload(self):
         """ Reload the locale file and reparse it """
         data = []
-        with open(f'locales/{self._locale_name}', 'r', encoding='utf-8') as f:
-            data = f.readlines()
-            f.close()
+        with open(f'locales/{self._locale_name}', 'r', encoding='utf-8') as file:
+            data = file.readlines()
+            file.close()
 
         for line in data:
             if line.rstrip().lstrip() != "":

@@ -20,5 +20,4 @@ def first_setup():
         config_mtime = os.path.getmtime(CONFIG_FILE)
         requirements_mtime = os.path.getmtime('requirements.txt')
         if config_mtime < requirements_mtime: # update
-            subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-r', 'requirements.txt'])
-
+            subprocess.check_call([sys.executable,'-m','pip','install','-r','requirements.txt'])
