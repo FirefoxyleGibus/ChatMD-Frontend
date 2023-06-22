@@ -5,4 +5,4 @@ pyyaml
 requests
 Pillow
 python-dotenv
-notifypy
+notify-py
