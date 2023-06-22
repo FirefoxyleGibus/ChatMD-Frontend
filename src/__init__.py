@@ -3,8 +3,7 @@ import asyncio
 
 from src.user_prefs.user_settings import UserSettings
 from src.app import App
-from src.menus.chatmenu import ChatMenu
-from src.menus.loginmenu import LoginMenu
+from src.menus import ChatMenu, LoginMenu, ExampleMenu
 
 def main():
     app = App()
@@ -13,8 +12,9 @@ def main():
 
     app.register_menu(LoginMenu())
     app.register_menu(ChatMenu())
+    app.register_menu(ExampleMenu())
 
-    # Start on login menu
+    # Start on a specific menu
     app.show_menu("login")
 
     app.run()

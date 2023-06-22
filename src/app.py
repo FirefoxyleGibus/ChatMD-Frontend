@@ -1,3 +1,5 @@
+import logging
+
 from blessed import *
 from blessed.keyboard import *
 
@@ -5,6 +7,9 @@ import asyncio
 from dotenv import load_dotenv
 
 from src.bridge import Connection
+
+# setup logging
+logging.basicConfig(level=logging.DEBUG, filename="debug_log.txt", filemode="w")
 
 class App:
     """ Main app class """
@@ -94,3 +99,8 @@ class App:
     def get_instance():
         """ Return the app instance """
         return App.instance
+
+    @staticmethod
+    def get_locale():
+        """ Return the locale of the app instance """
+        return App.get_instance().user_settings.get_locale()
