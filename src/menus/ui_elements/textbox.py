@@ -28,15 +28,15 @@ class TextBox(BaseSelectable):
     
     def handle_inputs(self, val: Keystroke, terminal: Terminal):
         ret = super().handle_inputs(val, terminal)
-        len_text = len(self._text)
         match val.name:
             case "KEY_BACKSPACE" if self._text != "" and self._curpos > 0:
-                self._text = self._text[:self._curpos] + self._text[self._curpos+1:]
+                self._text = self._text[:self._curpos-1] + self._text[self._curpos:]
+                self._curpos -= 1
                 print(terminal.clear)
             case "KEY_LEFT":
                 self._curpos = max(self._curpos - 1, 0)
             case "KEY_RIGHT":
-                self._curpos = min(self._curpos + 1, len_text)
+                self._curpos = min(self._curpos + 1, len(self._text))
             case None if str(val):
                 if self._curpos == 0:
                     self._text += str(val)
@@ -46,16 +46,12 @@ class TextBox(BaseSelectable):
                     self._curpos += 1
         return ret
 
-    def _draw_selected(self, terminal, pos_x, pos_y):
-        pass
-
-    def draw(self, terminal: Terminal, pos_x: int, pos_y: int):
-        """ Draw the textbox """
-        
+    def _get_shown_text(self, _terminal):
+        """ Return the text to show on screen """
         # Textbox draw
         text = self._prefix
-        if len(self._text) == 0:
-            text += terminal.darkgray(self._placeholder)
+        if len(self._text) == 0 and not self.is_selected:
+            text += self._placeholder
         else:
             text += self._text
             # scroll text left and right
@@ -63,15 +59,16 @@ class TextBox(BaseSelectable):
             #     start_pos = max(self._curpos - (len(self._width) - len(self._prefix)), 0)
             #     end_pos = min(self._curpos, len(self._text))
             #     show_text = self._text[start_pos:end_pos]
-        text, offset_x = TextStyle.align(terminal, self._align, text, self._width)
+        return text
 
-        formatted = (terminal.reverse if self._reverse else terminal.normal) \
-            + terminal.normal_cursor                                         \
-            + text                                                           \
-            + terminal.normal + terminal.hide_cursor
-
+    def draw(self, terminal: Terminal, pos_x: int, pos_y: int):
+        """ Draw the textbox """
+        background = (terminal.reverse if self._reverse else terminal.normal)
+        text, offset_x = TextStyle.align(terminal, self._align, self._get_shown_text(terminal), self._width)
+        formatted = background + text + terminal.normal
         print_at(terminal, pos_x + offset_x, pos_y, formatted)
 
         # Draw cursor
-        cursor_pos = pos_x + len(self._prefix) + self._curpos
-        print_at(terminal, cursor_pos, pos_y, terminal.blink("_"))
+        if len(self._text) != 0 or self.is_selected:
+            cursor_pos = pos_x + len(self._prefix) + self._curpos + offset_x
+            print_at(terminal, cursor_pos, pos_y, background + terminal.blink("_") + terminal.normal)
