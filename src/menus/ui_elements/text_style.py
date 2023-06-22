@@ -11,7 +11,7 @@ class TextStyle():
             case 'right':
                 return terminal.rjust(text, width), width-len(text)+1
             case 'center':
-                return terminal.center(text, width), width//2-len(text)//2
+                return terminal.center(text, width), width//2-(len(text)+1)//2
         return text, 0
     
     @staticmethod
