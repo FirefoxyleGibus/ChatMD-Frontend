@@ -16,6 +16,8 @@ class BaseMenu():
     def focus_selectable(self, selectable: BaseSelectable):
         """ Register a selectable element """
         if not selectable is None:
+            if not self._selected is None:
+                self._selected.deselect()
             self._selected = selectable
             self._selected.select()
 
