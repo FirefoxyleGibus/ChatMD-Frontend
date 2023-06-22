@@ -20,4 +20,4 @@ jobs:
         pip install pylint
     - name: Analysing the code with pylint
       run: |
-        pylint $(git ls-files '*.py') --ignore-imports --ignore-long-lines
+        pylint $(git ls-files '*.py')
