@@ -65,6 +65,7 @@ class TextBox(BaseSelectable):
 
     def draw(self, terminal: Terminal, pos_x: int, pos_y: int):
         """ Draw the textbox """
+
         background = (terminal.reverse if self._reverse else terminal.normal)
         text, left_char_pos = TextStyle.align(terminal, self._align, self._get_shown_text(terminal), self._width)
         offset_x = TextStyle.anchor_pos(self._anchor, self._width)
