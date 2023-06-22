@@ -17,7 +17,7 @@ jobs:
           spec: 'build.spec'
           requirements: 'requirements.txt'
           upload_exe_with_name: 'ChatMD'
-          options: --onefile, --name "ChatMD", --icon "chatmd.ico", 
+          options: --onefile, --name "ChatMD", 
 
   pyinstaller-build-linux:
     runs-on: ubuntu-latest
@@ -29,4 +29,4 @@ jobs:
           spec: 'build.spec'
           requirements: 'requirements.txt'
           upload_exe_with_name: 'ChatMD'
-          options: --onefile, --name "ChatMD", --icon "chatmd.ico", 
+          options: --onefile, --name "ChatMD", 
