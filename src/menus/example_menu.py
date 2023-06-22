@@ -1,7 +1,11 @@
+"""
+    Example menu using new ui class
+"""
+
 import logging 
 
 from src.menus.basemenu import BaseMenu
-from src.menus.ui_elements import Button, TextBox, TextBoxPassword
+from src.menus.ui_elements import Button, TextBox, TextBoxPassword, ElementStyle
 
 class ExampleMenu(BaseMenu):
     """ Example menu class """
@@ -13,13 +17,19 @@ class ExampleMenu(BaseMenu):
         buttons = {}
         centerbt = Button("Center", self.SIZE)
         buttons["up"]    = Button("Top", self.SIZE, attach={'down': centerbt})
-        buttons["right"] = Button("Right", self.SIZE, align='right', attach={'left': centerbt })
-        buttons["left"]  = Button("Left", self.SIZE, align='left', attach={'right': centerbt })
+        buttons["right"] = Button("Right", self.SIZE, style=ElementStyle({
+                'align': 'right', 
+            }), attach={'left': centerbt })
+        buttons["left"]  = Button("Left", self.SIZE, style=ElementStyle({
+                'align': 'left', 
+            }), attach={'right': centerbt })
         buttons["down"]  = Button("Bottom", self.SIZE, attach={'up': centerbt })
 
-        self._textbox = TextBox(60, "Type text...", ">>> ", False, 'center', 'left', attach={
-            'up': buttons['down'],
-        })
+        self._textbox = TextBox(60, "Type text...", ">>> ", style=ElementStyle({
+                'align:':'center',
+                'anchor':'left',
+                'background': True
+            }), attach={ 'up': buttons['down'],})
         buttons['down'].connect_side('down', self._textbox)
         self._pass = TextBoxPassword(60, attach={'up': self._textbox})
         self._textbox.connect_side('down', self._pass)
