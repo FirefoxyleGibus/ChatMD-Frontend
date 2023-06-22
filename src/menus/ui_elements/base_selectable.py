@@ -10,7 +10,7 @@ class BaseSelectable():
         'up':    2,
         'right': 3
     }
-    """ Connectable sides of a selectable """
+    """ Connectable sides of a selectable (override the values to disable it) """
 
     def __init__(self, attachments=None):
         self._attachments = {}
@@ -51,22 +51,22 @@ class BaseSelectable():
         match val.name:
             case "KEY_DOWN":
                 self.deselect()
-                ret = self._attachments.get(self.SIDES['down'], self)
+                ret = self._attachments.get(self.SIDES.get('down', len(self.SIDES)), self)
                 ret.select()
                 print(terminal.clear)
             case "KEY_UP":
                 self.deselect()
-                ret = self._attachments.get(self.SIDES['up'], self)
+                ret = self._attachments.get(self.SIDES.get('up', len(self.SIDES)), self)
                 ret.select()
                 print(terminal.clear)
             case "KEY_LEFT":
                 self.deselect()
-                ret = self._attachments.get(self.SIDES['left'], self)
+                ret = self._attachments.get(self.SIDES.get('left', len(self.SIDES)), self)
                 ret.select()
                 print(terminal.clear)
             case "KEY_RIGHT":
                 self.deselect()
-                ret = self._attachments.get(self.SIDES['right'], self)
+                ret = self._attachments.get(self.SIDES.get('right', len(self.SIDES)), self)
                 ret.select()
                 print(terminal.clear)
         return ret
