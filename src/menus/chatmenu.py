@@ -1,6 +1,8 @@
 from websockets import connect
 
 from src.menus.basemenu import BaseMenu
+from src.menus.ui_elements import TextBox
+from src.menus.ui_elements.base_selectable import BaseSelectable
 from src.app import App
 from src.user_prefs.user_settings import UserSettings
 from src.bridge import Connection
@@ -17,12 +19,10 @@ from src.termutil import *
 
 class ChatMenu(BaseMenu):
     """ Chat menu """
-    currentlytyped = ""
     name = "#Guigui"
     color = 0x17ff67
     channel = "general"
     messages = []
-    cursor = 0
     connection = None
     esc_menu = False
     esc_pos = 0
@@ -35,6 +35,9 @@ class ChatMenu(BaseMenu):
 
     def __init__(self):
         super().__init__("chat")
+        self._textbox = TextBox(1, "", ">>> ", anchor='center', align="left", reverse_background=False)
+        self._esc_focus = BaseSelectable()
+        self.focus_selectable(self._textbox)
 
     def _draw_messages(self, terminal, max_message_draw_pos=1, start_pos=4):
         locale = UserSettings.get_current().get_locale()
@@ -70,6 +73,7 @@ class ChatMenu(BaseMenu):
                 pass
             case _:
                 self.esc_menu = False
+                self.focus_selectable(self._textbox)
                 print(terminal.clear)
 
     def _draw_esc_menu(self, terminal):
@@ -81,16 +85,16 @@ class ChatMenu(BaseMenu):
         print_at(terminal, 0,len(self.esc_buttons), "─"*terminal.width)
 
     def draw(self, terminal) -> None:
-        _lang = App.get_instance().user_settings.get_locale()
-        
-        line_amount = round(((len(self.currentlytyped)+4) / terminal.width)+0.5)
-        print_at(terminal, 0, terminal.height-(2+line_amount), "─"*terminal.width)
-        print_at(terminal, 0, terminal.height-(1+line_amount), ">>> " + self.currentlytyped + terminal.clear_eol)
+        self._textbox._width = terminal.width-1
+
+        print_at(terminal, 0, terminal.height-3, "─"*terminal.width)
+        self._textbox.draw(terminal, terminal.width//2, terminal.height - 2)
         if self.esc_menu:
+            self._esc_focus.draw() # this will be used when i make a proper options dropdown
             self._draw_esc_menu(terminal)
-            self._draw_messages(terminal, max_message_draw_pos=len(self.esc_buttons), start_pos=line_amount+3)
+            self._draw_messages(terminal, max_message_draw_pos=len(self.esc_buttons), start_pos=4)
         else:
-            self._draw_messages(terminal, start_pos=line_amount+3)
+            self._draw_messages(terminal, start_pos=4)
             print_at(terminal, terminal.width-10,0, self.connection.status)
             print_at(terminal, 1,0,f"#{self.channel}")
             print_at(terminal, 0,1, "─"*terminal.width)
@@ -102,6 +106,7 @@ class ChatMenu(BaseMenu):
         if self.esc_menu:
             if val.name == "KEY_ESCAPE":
                 self.esc_menu = False
+                self.focus_selectable(self._textbox)
                 print(terminal.clear)
             elif val.name in ("KEY_DOWN", "KEY_UP"):
                 self.esc_pos += {"KEY_DOWN":1, "KEY_UP": -1}[val.name]
@@ -111,17 +116,18 @@ class ChatMenu(BaseMenu):
                 self._execute_esc_button(self.esc_buttons[self.esc_pos], terminal)
         else:
             if val.name == "KEY_ENTER":
-                if self.currentlytyped != "":
-                    self.messages.append(('message', self.name, self.currentlytyped, -1))
+                if self._textbox._text != "":
+                    self.messages.append(('message', self.name, self._textbox._text, -1))
                     print(terminal.clear)
-                    self.connection.send_message(self.currentlytyped)
-                    self.currentlytyped = ""
+                    self.connection.send_message(self._textbox._text)
+                    self._textbox._text = ""
             elif val.name == "KEY_ESCAPE":
+                self.focus_selectable(self._esc_focus)
                 print(terminal.clear)
                 self.esc_menu = True
                 self.esc_pos = 0
             else:
-                self.currentlytyped, self.cursor = textbox_logic(self.currentlytyped, self.cursor, val)
+                pass
 
     def connect(self, token):
         """ Connect to the backend """
