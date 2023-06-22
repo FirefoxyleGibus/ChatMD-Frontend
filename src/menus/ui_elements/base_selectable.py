@@ -12,9 +12,10 @@ class BaseSelectable():
     }
     """ Connectable sides of a selectable (override the values to disable it) """
 
-    def __init__(self, attachments=None):
+    def __init__(self, attachments=None, clear_terminal_move=True):
         self._attachments = {}
         self._is_selected = False
+        self._clear_terminal = clear_terminal_move
 
         if attachments:
             for side in attachments:
@@ -38,6 +39,10 @@ class BaseSelectable():
         if side in self.SIDES:
             self._attachments[self.SIDES[side]] = element
 
+    def _connected_to(self, side) -> bool:
+        """ Return if this side is connected """
+        return side in self.SIDES and self.SIDES[side] in self._attachments
+
     def handle_inputs(self, val: Keystroke, terminal: Terminal):
         """ 
         Handle inputs and return the
@@ -49,26 +54,30 @@ class BaseSelectable():
         """
         ret = self
         match val.name:
-            case "KEY_DOWN":
+            case "KEY_DOWN" if self._connected_to('down'):
                 self.deselect()
-                ret = self._attachments.get(self.SIDES.get('down', len(self.SIDES)), self)
+                ret = self._attachments.get(self.SIDES.get('down'))
+                if self._clear_terminal:
+                    print(terminal.clear)
                 ret.select()
-                print(terminal.clear)
-            case "KEY_UP":
+            case "KEY_UP" if self._connected_to('up'):
                 self.deselect()
-                ret = self._attachments.get(self.SIDES.get('up', len(self.SIDES)), self)
+                ret = self._attachments.get(self.SIDES.get('up'))
+                if self._clear_terminal:
+                    print(terminal.clear)
                 ret.select()
-                print(terminal.clear)
-            case "KEY_LEFT":
+            case "KEY_LEFT" if self._connected_to('left'):
                 self.deselect()
-                ret = self._attachments.get(self.SIDES.get('left', len(self.SIDES)), self)
+                ret = self._attachments.get(self.SIDES.get('left'))
+                if self._clear_terminal:
+                    print(terminal.clear)
                 ret.select()
-                print(terminal.clear)
-            case "KEY_RIGHT":
+            case "KEY_RIGHT" if self._connected_to('right'):
                 self.deselect()
-                ret = self._attachments.get(self.SIDES.get('right', len(self.SIDES)), self)
+                ret = self._attachments.get(self.SIDES.get('right'))
+                if self._clear_terminal:
+                    print(terminal.clear)
                 ret.select()
-                print(terminal.clear)
         return ret
 
     def draw(self, terminal: Terminal, pos_x: int, pos_y: int):

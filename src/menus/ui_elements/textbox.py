@@ -17,7 +17,7 @@ class TextBox(BaseSelectable):
     }
 
     def __init__(self, width: int, placeholder="text ...", prefix="", reverse_background=True, alignement: str = 'center', attachments: dict = None):
-        super().__init__(attachments=attachments)
+        super().__init__(attachments=attachments, clear_terminal_move=False)
         self._text = ""
         self._curpos = 0
         self._width = width
@@ -32,7 +32,7 @@ class TextBox(BaseSelectable):
             case "KEY_BACKSPACE" if self._text != "" and self._curpos > 0:
                 self._text = self._text[:self._curpos-1] + self._text[self._curpos:]
                 self._curpos -= 1
-                print(terminal.clear)
+                # print(terminal.clear)
             case "KEY_LEFT":
                 self._curpos = max(self._curpos - 1, 0)
             case "KEY_RIGHT":
@@ -53,12 +53,13 @@ class TextBox(BaseSelectable):
         if len(self._text) == 0 and not self.is_selected:
             text += self._placeholder
         else:
-            text += self._text
-            # scroll text left and right
-            # if len(self._text) + len(self._prefix) > self._width:
-            #     start_pos = max(self._curpos - (len(self._width) - len(self._prefix)), 0)
-            #     end_pos = min(self._curpos, len(self._text))
-            #     show_text = self._text[start_pos:end_pos]
+            show_text = self._text
+            # scroll text left and right if overflow
+            if len(self._text) + len(self._prefix) > self._width:
+                start_pos = max(self._curpos - (self._width - len(self._prefix)), 0)
+                end_pos = min(self._curpos, len(self._text))
+                show_text = self._text[start_pos:end_pos]
+            text += show_text
         return text
 
     def draw(self, terminal: Terminal, pos_x: int, pos_y: int):
