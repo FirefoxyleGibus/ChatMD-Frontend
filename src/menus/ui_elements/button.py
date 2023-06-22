@@ -12,11 +12,11 @@ class Button(BaseSelectable):
     _SELECT_INDICATOR_MARGIN: int = 4
     """ Margin from the button to the blinky > button_text < """
 
-    def __init__(self, text: str, width: int, alignement:str='center', attachments:dict=None):
-        super().__init__(attachments=attachments)
+    def __init__(self, text: str, width: int, align:str='center', attach:dict=None):
+        super().__init__(attachments=attach)
         self._text = text
         self._width = width
-        self._align = alignement
+        self._align = align
         # callback
         self._callback = lambda *args: None
         self._callback_args = []
@@ -34,6 +34,11 @@ class Button(BaseSelectable):
         if val.name == "KEY_ENTER":
             self._callback(*self._callback_args, **self._callback_kwargs)
         return ret
+    
+    def set_text(self, text: str):
+        """ Set text of this button """
+        if isinstance(text, str):
+            self._text = text
 
     def draw(self, terminal: Terminal, pos_x: int, pos_y: int):
         """ Draw the button """
