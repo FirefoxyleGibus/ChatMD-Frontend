@@ -40,8 +40,13 @@ class ChatMenu(BaseMenu):
         self._esc_focus = BaseSelectable()
         self.focus_selectable(self._textbox)
         
+        self._latency = 0
         self._online_members = set()
-    
+
+    def set_latency(self, latency):
+        """ Set the latency """
+        self._latency = latency
+
     def add_online(self, username):
         """ Add online member to list """
         self._online_members.add(username)
@@ -110,11 +115,13 @@ class ChatMenu(BaseMenu):
             self._draw_messages(terminal, max_message_draw_pos=len(self.esc_buttons), start_pos=4)
         else:
             self._draw_messages(terminal, start_pos=4)
-            print_at(terminal, terminal.width-10,0, self.connection.status)
+            # connection status
+            latency = terminal.rjust(f"{self._latency}ms", 6)
+            print_at(terminal, terminal.width-len(self.connection.status)-len(latency)-5,0, self.connection.status)
+            print_at(terminal, terminal.width-len(latency)-5,0, latency)
+            
             print_at(terminal, 1,0,f"#{self.channel}")
             print_at(terminal, 0,1, "─"*terminal.width)
-
-
 
     def handle_input(self, terminal):
         val = super().handle_input(terminal)
@@ -160,20 +167,20 @@ class ChatMenu(BaseMenu):
         match message_type:
             case "Join":
                 self.messages.append(('join', username, at))
-                Notify(default_notification_application_name = "ChatMD",
-                       default_notification_icon             = r"chatmd.ico",
-                       default_notification_title            = username,
-                       default_notification_message          = "just joined !").send(block=False)
                 if not _preload:
+                    Notify(default_notification_application_name = "ChatMD",
+                        default_notification_icon             = r"chatmd.ico",
+                        default_notification_title            = username,
+                        default_notification_message          = "just joined !").send(block=False)
                     self.add_online(username)
             case "Leave":
                 self.messages.append(('leave', username, at))
-                Notify(default_notification_application_name = "ChatMD",
-                       default_notification_icon             = r"chatmd.ico",
-                       default_notification_title            = username,
-                       default_notification_message          = "just left !").send(block=False)
                 if not _preload:
-                    self.add_online(username)
+                    Notify(default_notification_application_name = "ChatMD",
+                        default_notification_icon             = r"chatmd.ico",
+                        default_notification_title            = username,
+                        default_notification_message          = "just left !").send(block=False)
+                    self.remove_online(username)
             case _:
                 if ('message', username, content, -1) in self.messages:
                     self.messages.remove(('message', username, content, -1))
