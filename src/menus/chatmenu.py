@@ -4,6 +4,7 @@ from src.menus.basemenu import *
 from src.app import App
 from src.user_prefs.user_settings import *
 from src.bridge import *
+from notifypy import Notify
 
 # ---------------------------
 # TO DO : Handle reception
@@ -130,7 +131,7 @@ class ChatMenu(BaseMenu):
         """ Connect to the backend """
         self.connection = App.get_instance().websocket.connect(Connection.WS_ENDPOINT,token)
 
-    def print_message(self, message_type, username, content, at, _color=0x0):
+    def print_message(self, message_type, username, content, at, _preload = False, _color=0x0):
         """
         Appends a message to the screen
         
@@ -147,4 +148,10 @@ class ChatMenu(BaseMenu):
             case _:
                 if ('message', username, content, -1) in self.messages:
                     self.messages.remove(('message', username, content, -1))
+                else:
+                    if (not _preload):
+                        Notify(default_notification_application_name = "ChatMD",
+                               default_notification_icon             = r"chatmd.ico",
+                               default_notification_title            = username,
+                               default_notification_message          = content).send(block=False)
                 self.messages.append(('message', username, content, at))
