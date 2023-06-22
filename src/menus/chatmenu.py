@@ -120,7 +120,7 @@ class ChatMenu(BaseMenu):
                     self.messages.append(('message', self.name, self._textbox.text, -1))
                     print(terminal.clear)
                     self.connection.send_message(self._textbox.text)
-                    self._textbox.text = ""
+                    self._textbox.set_text("")
             elif val.name == "KEY_ESCAPE":
                 self.focus_selectable(self._esc_focus)
                 print(terminal.clear)

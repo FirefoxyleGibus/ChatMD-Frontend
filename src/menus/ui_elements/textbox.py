@@ -50,9 +50,13 @@ class TextBox(BaseSelectable):
         self._width = width
 
     @property
-    def text(self):
+    def text(self) -> str:
         """ Return the text of this textbox """
         return self._text
+    
+    def set_text(self, new_text: str) -> None:
+        """ Set the content of this textbox """
+        self._text = new_text
 
     def _visible_text(self):
         return self._text
