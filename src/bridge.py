@@ -60,7 +60,7 @@ class Connection():
             if isinstance(message, list): # last posted messages
                 logging.info("Recieved Last messages: %s", message)
                 for msg in message:
-                    self._post_chat_message("", msg["username"], msg["message"], msg["at"])
+                    self._post_chat_message("", msg["username"], msg["message"], msg["at"], _preload = True)
                 self.app.get_menu("chat").messages.reverse()
                 continue
             logging.info("Received message: %s", message)
@@ -71,8 +71,8 @@ class Connection():
                 case "event":
                     self._post_chat_message(message["data"]["event"], message["data"]["username"], "")
 
-    def _post_chat_message(self, msg_type, username, content, at = 0):
-        self.app.get_menu("chat").print_message(msg_type, username, content, at)
+    def _post_chat_message(self, msg_type, username, content, at = 0, _preload = False):
+        self.app.get_menu("chat").print_message(msg_type, username, content, at, _preload = _preload)
 
     def close(self):
         """ Close the connection """
