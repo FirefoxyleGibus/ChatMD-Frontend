@@ -135,8 +135,7 @@ class ChatMenu(BaseMenu):
             self._draw_messages(terminal, start_pos=4)
             # connection status
             latency = terminal.center(f"{self._latency}ms", 6)
-            topright = f"   {self.connection.status} | {latency} \
-                | {len(self._online_members)} online"
+            topright = f"   {self.connection.status} | {latency} | {len(self._online_members)} online"
             print_at(terminal, terminal.width-len(topright), 0, topright)
 
             print_at(terminal, 1, 0, f"#{self.channel}")
