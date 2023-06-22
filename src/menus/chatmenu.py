@@ -85,12 +85,12 @@ class ChatMenu(BaseMenu):
         print_at(terminal, 0,len(self.esc_buttons), "─"*terminal.width)
 
     def draw(self, terminal) -> None:
-        self._textbox._width = terminal.width-1
+        self._textbox.resize(terminal.width-1)
 
         print_at(terminal, 0, terminal.height-3, "─"*terminal.width)
         self._textbox.draw(terminal, terminal.width//2, terminal.height - 2)
         if self.esc_menu:
-            self._esc_focus.draw() # this will be used when i make a proper options dropdown
+            self._esc_focus.draw(terminal, 0, 0) # this will be used when i make a proper options dropdown
             self._draw_esc_menu(terminal)
             self._draw_messages(terminal, max_message_draw_pos=len(self.esc_buttons), start_pos=4)
         else:
@@ -116,11 +116,11 @@ class ChatMenu(BaseMenu):
                 self._execute_esc_button(self.esc_buttons[self.esc_pos], terminal)
         else:
             if val.name == "KEY_ENTER":
-                if self._textbox._text != "":
-                    self.messages.append(('message', self.name, self._textbox._text, -1))
+                if self._textbox.text != "":
+                    self.messages.append(('message', self.name, self._textbox.text, -1))
                     print(terminal.clear)
-                    self.connection.send_message(self._textbox._text)
-                    self._textbox._text = ""
+                    self.connection.send_message(self._textbox.text)
+                    self._textbox.text = ""
             elif val.name == "KEY_ESCAPE":
                 self.focus_selectable(self._esc_focus)
                 print(terminal.clear)
