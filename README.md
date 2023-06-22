@@ -2,6 +2,7 @@
  The chat app running in CMD
 
 [![Python application](https://github.com/Louvtt/ChatMD-Frontend/actions/workflows/python-app.yml/badge.svg)](https://github.com/Louvtt/ChatMD-Frontend/actions/workflows/python-app.yml)
+[![PyLint](https://github.com/Louvtt/ChatMD-Frontend/actions/workflows/pylint.yml/badge.svg)](https://github.com/Louvtt/ChatMD-Frontend/actions/workflows/pylint.yml)
 
 ## Install
 
