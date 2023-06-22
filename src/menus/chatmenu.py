@@ -116,7 +116,7 @@ class ChatMenu(BaseMenu):
                 self._execute_esc_button(self.esc_buttons[self.esc_pos], terminal)
         else:
             if val.name == "KEY_ENTER":
-                if self._textbox.text != "":
+                if self._textbox.text.strip() != "":
                     self.messages.append(('message', self.name, self._textbox.text, -1))
                     print(terminal.clear)
                     self.connection.send_message(self._textbox.text)
