@@ -39,6 +39,16 @@ class ChatMenu(BaseMenu):
         self._textbox = TextBox(1, "", ">>> ", anchor='center', align="left", reverse_background=False)
         self._esc_focus = BaseSelectable()
         self.focus_selectable(self._textbox)
+        
+        self._online_members = set()
+    
+    def add_online(self, username):
+        """ Add online member to list """
+        self._online_members.add(username)
+    
+    def remove_online(self, username):
+        """ Remove online member """
+        self._online_members.discard(username)
 
     def _draw_messages(self, terminal, max_message_draw_pos=1, start_pos=4):
         locale = UserSettings.get_current().get_locale()
@@ -154,12 +164,16 @@ class ChatMenu(BaseMenu):
                        default_notification_icon             = r"chatmd.ico",
                        default_notification_title            = username,
                        default_notification_message          = "just joined !").send(block=False)
+                if not _preload:
+                    self.add_online(username)
             case "Leave":
                 self.messages.append(('leave', username, at))
                 Notify(default_notification_application_name = "ChatMD",
                        default_notification_icon             = r"chatmd.ico",
                        default_notification_title            = username,
                        default_notification_message          = "just left !").send(block=False)
+                if not _preload:
+                    self.add_online(username)
             case _:
                 if ('message', username, content, -1) in self.messages:
                     self.messages.remove(('message', username, content, -1))
