@@ -1,4 +1,7 @@
-from src.termutil import *
+""" 
+    Base Menu class file
+"""
+from src.termutil import print_at
 from src.menus.ui_elements.base_selectable import BaseSelectable
 
 class BaseMenu():

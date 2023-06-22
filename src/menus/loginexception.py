@@ -1,3 +1,6 @@
+"""
+    Login Exception
+"""
 
 class LoginException(Exception):
     """ Exception for login or register """

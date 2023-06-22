@@ -1,5 +1,7 @@
-# install missing libraries on first
-# startup and load user settings
+"""
+    Install missing libraries on first
+    Startup and load user settings
+"""
 from src.user_prefs import first_setup
 try:
     from src import main

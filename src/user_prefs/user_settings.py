@@ -1,3 +1,6 @@
+"""
+    UserSettings class file
+"""
 import os
 from yaml import load, dump
 try:
@@ -13,9 +16,9 @@ class UserSettings:
     """ User settings """
     def __init__(self):
         if not os.path.isfile(CONFIG_FILE):
-            file = open(CONFIG_FILE, 'w', encoding='utf-8')
-            file.write('setup: yes')
-            file.close()
+            with open(CONFIG_FILE, 'w', encoding='utf-8') as file:
+                file.write('setup: yes')
+                file.close()
 
         with open(CONFIG_FILE, 'r', encoding='utf-8') as file:
             self._content = load(file, Loader=Loader)

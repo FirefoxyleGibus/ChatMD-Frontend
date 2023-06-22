@@ -1,7 +1,9 @@
+"""
+    Websockect bridge to the backend (see Connection)
+"""
 import os
 import json
 import asyncio
-import time
 import logging
 from websockets import connect, ConnectionClosed
 
@@ -66,10 +68,10 @@ class Connection():
                 logging.info("Online members: %s", data["online"])
                 for member in data["online"]:
                     self.app.get_menu("chat").add_online(member["username"])
-            
+
             if "messages" in data or "online" in data:
                 continue
-            
+
             logging.info("Received message: %s", data)
             # when message is just posted and we are connected
             self._handle_new_message(data)
@@ -79,9 +81,11 @@ class Connection():
         data = message if on_join_message else message.get("data", message)
         match msg_type:
             case "message" if data["message"]:
-                self.app.get_menu("chat").print_message(msg_type, data["username"], data["message"], data["at"], _preload = on_join_message)
+                self.app.get_menu("chat").print_message(msg_type,
+                    data["username"], data["message"], data["at"], _preload = on_join_message)
             case "event":
-                self.app.get_menu("chat").print_message(data["event"], data["username"], "", data["at"], _preload = on_join_message)
+                self.app.get_menu("chat").print_message(data["event"], 
+                    data["username"], "", data["at"], _preload = on_join_message)
             case "latency":
                 self.app.get_menu("chat").set_latency(data["latency_ms"])
 
@@ -89,4 +93,3 @@ class Connection():
         """ Close the connection """
         self.socket.close()
         self.socket = None
-

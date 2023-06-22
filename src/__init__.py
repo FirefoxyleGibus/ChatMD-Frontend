@@ -1,3 +1,6 @@
+"""
+    ChatMD Entry
+"""
 import datetime
 import asyncio
 
@@ -6,6 +9,7 @@ from src.app import App
 from src.menus import ChatMenu, LoginMenu, ExampleMenu
 
 def main():
+    """ function Entry point """
     app = App()
     app.user_settings = UserSettings()
     app.user_settings.set("last_opened", datetime.datetime.now().strftime('%H:%M:%S %A %d %B %Y'))
