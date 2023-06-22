@@ -1,0 +1,41 @@
+name: Make release with Build binaries
+
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+ 
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+
+    - name: PyInstaller Linux amd64
+      id: amd64
+      uses: action-python/pyinstaller-py3.8@amd64
+      with:
+        path: .
+        rename: chatmd_linux
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+
+    - name: Upload Linux File amd64
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} 
+          asset_path: ${{ steps.amd64.outputs.location }}
+          asset_name: ${{ steps.amd64.outputs.filename }}
+          asset_content_type: ${{ steps.amd64.outputs.content_type }}
