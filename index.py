@@ -1,7 +1,11 @@
 # install missing libraries on first
 # startup and load user settings
 from src.user_prefs import first_setup
-from src import main
+try:
+    from src import main
+except ImportError:
+    first_setup()
+    from src import main
 
 if __name__ == "__main__":
     first_setup()
