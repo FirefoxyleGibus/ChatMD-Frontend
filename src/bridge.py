@@ -27,7 +27,7 @@ class Connection():
             logging.debug(task) # to prevent a "Task exception was never retrieved"
         else:
             logging.error("socket is not connected")
-    
+
     async def run(self):
         """ Main entry of the program """
         logging.debug("Connecting to WS : %s", self.url)
@@ -51,29 +51,40 @@ class Connection():
     async def receive_messages(self):
         """ Recieve messages """
         logging.debug(".")
-        async for received_message in self.socket:
-            logging.debug(received_message)
-            message = json.loads(received_message)
-            if isinstance(message, list): # last posted messages
-                logging.info("Recieved Last messages: %s", message)
-                for msg in message:
-                    self._post_chat_message("", msg["username"], msg["message"], msg["at"], _preload = True)
+        async for received_data in self.socket:
+            logging.debug(received_data)
+            data = json.loads(received_data)
+
+            # ON JOIN
+            if "messages" in data: # last posted messages
+                logging.info("Recieved Last messages: %s", data["messages"])
+                for msg in data["messages"]:
+                    self._handle_new_message(msg, on_join_message=True)
                 self.app.get_menu("chat").messages.reverse()
                 continue
-            logging.info("Received message: %s", message)
-            # when message is just posted and we are connected
-            match message["type"]:
-                case "message":
-                    self._post_chat_message("", message["data"]["username"], message["data"]["message"], int(time.time_ns()/1000))
-                case "event":
-                    self._post_chat_message(message["data"]["event"], message["data"]["username"], "")
 
-    def _post_chat_message(self, msg_type, username, content, at = 0, _preload = False):
-        self.app.get_menu("chat").print_message(msg_type, username, content, at, _preload = _preload)
+            if "online" in data:
+                logging.info("Online members: %s", data["online"])
+                for member in data["online"]:
+                    self.app.get_menu("chat").add_online(member["username"])
+            
+            logging.info("Received message: %s", data)
+            # when message is just posted and we are connected
+            self._handle_new_message(data)
+
+    def _handle_new_message(self, message, on_join_message=False):
+        msg_type = message["type"]
+        data = message if on_join_message else message.get("data", message)
+        match msg_type:
+            case "message" if data["message"]:
+                self.app.get_menu("chat").print_message(msg_type, data["username"], data["message"], data["at"], _preload = on_join_message)
+            case "event":
+                self.app.get_menu("chat").print_message(data["event"], data["username"], "", data["at"], _preload = on_join_message)
+            case "latency":
+                self.app.get_menu("chat").set_latency(data["latency_ms"])
 
     def close(self):
         """ Close the connection """
         self.socket.close()
         self.socket = None
-    
-    
+
