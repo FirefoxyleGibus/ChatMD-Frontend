@@ -7,7 +7,7 @@ class TextBoxPassword(TextBox):
 
     def __init__(self, width: int, prefix="", reverse_background=True, anchor="center", align='center', attach=None):
         super().__init__(width, "", prefix, reverse_background, anchor, align, attach)
-        self._width -= 4 # space for toggle_button
+        # self._width -= 4 # space for toggle_button
         self._hidden_text = ""
         self._hidden = True
         self._toggle_button = Button('[ ]', 3, anchor='left', align='right', attach={'up': self})\

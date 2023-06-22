@@ -13,7 +13,7 @@ class TextBox(BaseSelectable):
         'up':    1,
     }
 
-    def __init__(self, width: int, placeholder="text ...", prefix="", reverse_background=True, anchor='center', align: str = 'center', attach: dict = None):
+    def __init__(self, width: int, placeholder="", prefix="", reverse_background=True, anchor='center', align: str = 'center', attach: dict = None):
         super().__init__(attachments=attach, clear_terminal_move=False)
         self._text = ""
         self._curpos = 0

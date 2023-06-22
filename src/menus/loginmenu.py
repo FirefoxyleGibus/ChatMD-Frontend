@@ -5,6 +5,7 @@ import requests
 import logging
 
 from src.menus.basemenu import BaseMenu
+from src.menus.ui_elements import TextBox, TextBoxPassword, Button
 from src.termutil import print_at, textbox_logic, Keystroke
 from src.app import App
 from src.menus.loginexception import LoginException
@@ -12,15 +13,24 @@ from src.bridge import Connection
 
 class LoginMenu(BaseMenu):
     """ Login menu """
-    username = ""
-    password = ""
-    selec = 0
-    maxoptions = 4 #Username, Password, Confirm, Quit
-    cursorPos = [0,0]
 
     def __init__(self):
         super().__init__("login")
         self.status_message = ""
+
+        lang = App.get_instance().user_settings.get_locale()
+        self._username = TextBox(40)
+
+        self._password = TextBoxPassword(40, attach={'up': self._username})
+        self._username.connect_side('down', self._password)
+
+        self._connect_button = Button(lang.get("connect"), 20, attach={'up': self._password}).set_on_click(self._login_button)
+        self._password.connect_side('down', self._connect_button)
+
+        self._quit_button = Button(lang.get("quit"), 20, attach={'up': self._connect_button}).set_on_click(App.get_instance().quit)
+        self._connect_button.connect_side('down', self._quit_button)
+
+        self.focus_selectable(self._username)
 
     def login(self, username, password) -> str:
         """ Log in with a username and a password """
@@ -62,63 +72,44 @@ class LoginMenu(BaseMenu):
 
     def draw(self, terminal) -> None:
         lang = App.get_instance().user_settings.get_locale()
+
+        center_x, center_y = terminal.width//2, terminal.height//2
+
         logintext = lang.get("login")
-        print_at(terminal, (terminal.width-len(logintext))*0.5, terminal.height*0.5-5, logintext)
-        print_at(terminal, (terminal.width-len(self.status_message))*0.5, terminal.height*0.5-4, terminal.red(self.status_message))
-        print_at(terminal, (terminal.width-40)*0.5, terminal.height*0.5-2, terminal.center(lang.get("username"), 40))
-        print_at(terminal, (terminal.width-40)*0.5, terminal.height*0.5-1, terminal.reverse + terminal.center(self.username, 40) + terminal.normal)
-        print_at(terminal, (terminal.width-40)*0.5, terminal.height*0.5+1, terminal.center(lang.get("password"), 40))
-        print_at(terminal, (terminal.width-40)*0.5, terminal.height*0.5+2, terminal.reverse + terminal.center("*"*len(self.password), 40) + terminal.normal)
+        print_at(terminal, center_x-len(logintext)//2, center_y-5, logintext)
+        print_at(terminal, center_x-len(self.status_message)//2, center_y-4, terminal.red(self.status_message))
 
-        print_at(terminal, (terminal.width-20)*0.5, terminal.height*0.5+4, terminal.reverse + terminal.center(lang.get("connect"), 20))
+        username = lang.get("username")
+        print_at(terminal, center_x-len(username)//2, center_y-3, username)
+        self._username.draw(terminal, center_x, center_y-2)
+        
+        password = lang.get("password")
+        print_at(terminal, center_x-len(password)//2, center_y-1, password)
+        self._password.draw(terminal, center_x, center_y)
 
-        print_at(terminal, (terminal.width-20)*0.5, terminal.height*0.5+6, terminal.reverse + terminal.center(lang.get("quit"), 20))
+        self._connect_button.draw(terminal, center_x, center_y+2)
+        self._quit_button.draw(terminal, center_x, center_y+4)
 
-        match self.selec:
-            case 0:
-                print_at(terminal, (terminal.width-44)*0.5, terminal.height*0.5-1, terminal.normal + terminal.blink(">"))
-            case 1:
-                print_at(terminal, (terminal.width-44)*0.5, terminal.height*0.5+2, terminal.normal + terminal.blink(">"))
-            case 2:
-                print_at(terminal, (terminal.width-24)*0.5, terminal.height*0.5+4, terminal.normal + terminal.blink(">"))
-                print_at(terminal, (terminal.width+24)*0.5, terminal.height*0.5+4, terminal.normal + terminal.blink("<"))
-            case 3:
-                print_at(terminal, (terminal.width-24)*0.5, terminal.height*0.5+6, terminal.normal + terminal.blink(">"))
-                print_at(terminal, (terminal.width+24)*0.5, terminal.height*0.5+6, terminal.normal + terminal.blink("<"))
         date = datetime.datetime.now()
 
         date_message = lang.get('date_status').format(time=date.strftime('%H:%M:%S'), date=date.strftime('%A %d %B %Y'))
         print_at(terminal, 1,terminal.height-2, terminal.normal + date_message)
 
+    def _login_button(self):
+        lang = App.get_instance().user_settings.get_locale()
+        try:
+            newtoken = self.login(self._username.text, self._password.text)
+            self.status_message = ""
+            app = App.get_instance()
+            app.token = newtoken
+            app.show_menu("chat")
+            app.get_menu("chat").name = self._username.text
+            app.get_menu("chat").connect(app.token)
+        except LoginException as err:
+            self.status_message = lang.get(err.get_failure())
 
     def handle_input(self, terminal) -> None:
         val:Keystroke = super().handle_input(terminal)
-        lang = App.get_instance().user_settings.get_locale()
-        if val.name in ["KEY_UP", "KEY_DOWN"]:
-            self.selec += {"KEY_UP":-1, "KEY_DOWN":1}[val.name]
-            self.selec %= self.maxoptions
+        if self._connect_button.is_selected and val.name == "KEY_ENTER":
             print(terminal.clear)
-        match self.selec:
-            case 0:
-                self.username, self.cursorPos[0] = textbox_logic(self.username, self.cursorPos[0], val)
-            case 1:
-                self.password, self.cursorPos[1] = textbox_logic(self.password, self.cursorPos[1], val)
-            case 2:
-                if val.name == "KEY_ENTER":
-                    try:
-                        newtoken = self.login(self.username, self.password)
-                        print(terminal.clear)
-                        self.status_message = ""
-                        app = App.get_instance()
-                        app.token = newtoken
-                        app.show_menu("chat")
-                        app.get_menu("chat").name = self.username
-                        app.get_menu("chat").connect(app.token)
-                    except LoginException as err:
-                        print(terminal.clear)
-                        self.status_message = lang.get(err.get_failure())
-
-            case 3:
-                if val.name == "KEY_ENTER":
-                    App.get_instance().quit()
 
