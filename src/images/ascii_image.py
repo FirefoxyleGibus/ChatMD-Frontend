@@ -1,3 +1,6 @@
+"""
+    AsciiImage class file
+"""
 from PIL import Image
 
 class AsciiImage:
