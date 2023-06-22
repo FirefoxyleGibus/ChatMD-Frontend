@@ -4,8 +4,9 @@ from src.menus.basemenu import BaseMenu
 from src.menus.ui_elements import TextBox
 from src.menus.ui_elements.base_selectable import BaseSelectable
 from src.app import App
-from src.user_prefs.user_settings import UserSettings
-from src.bridge import Connection
+from src.user_prefs.user_settings import *
+from src.bridge import *
+from notifypy import Notify
 from src.termutil import *
 
 # ---------------------------
@@ -49,12 +50,16 @@ class ChatMenu(BaseMenu):
                 case 'message':
                     usrw = len(f"{nowmsg[1]}: ")
                     maxw = terminal.width - usrw
-                    line_amount = round((len(nowmsg[2]) / maxw)+0.5)
-                    print_at(terminal, 0,msgdrawpos-(line_amount-1),f"{terminal.bold(nowmsg[1])}: ")
+                    coltxt = color_text(terminal, nowmsg[2])
+                    line_amount = round((len(terminal.strip_seqs(coltxt)) / maxw)+0.5)
                     col = terminal.normal if nowmsg[3] != -1 else terminal.grey50
-                    for i in range(line_amount):
-                        print_at(terminal, usrw, msgdrawpos-(line_amount-1)+i, col + nowmsg[2][i*maxw:(i+1)*maxw] + terminal.clear_eol() + terminal.normal)
-                    msgdrawpos-=line_amount
+                    if msgdrawpos-line_amount+1 > max_message_draw_pos:
+                        print_at(terminal, 0,msgdrawpos-line_amount+1,col + terminal.bold(nowmsg[1]) + col + ": ")
+                        print_at(terminal, usrw, msgdrawpos-line_amount+1, terminal.ljust(col + coltxt, int(terminal.width-usrw)) + terminal.normal + terminal.clear_eol())
+                    else:
+                        text_to_crop = terminal.ljust(col + coltxt, int(terminal.width-usrw)).split("\n")
+                        print_at(terminal, usrw, max_message_draw_pos, "\n".join(text_to_crop[-((msgdrawpos-line_amount+1)-max_message_draw_pos):]))
+                    msgdrawpos-=max(1, line_amount)
                 case 'join':
                     print_at(terminal, 0, msgdrawpos, terminal.green("[+] ") + locale.get('welcome').format(user = terminal.bold(nowmsg[1])) + terminal.clear_eol())
                     msgdrawpos-=1
@@ -133,7 +138,7 @@ class ChatMenu(BaseMenu):
         """ Connect to the backend """
         self.connection = App.get_instance().websocket.connect(Connection.WS_ENDPOINT,token)
 
-    def print_message(self, message_type, username, content, at, _color=0x0):
+    def print_message(self, message_type, username, content, at, _preload = False, _color=0x0):
         """
         Appends a message to the screen
         
@@ -145,9 +150,23 @@ class ChatMenu(BaseMenu):
         match message_type:
             case "Join":
                 self.messages.append(('join', username, at))
+                Notify(default_notification_application_name = "ChatMD",
+                       default_notification_icon             = r"chatmd.ico",
+                       default_notification_title            = username,
+                       default_notification_message          = "just joined !").send(block=False)
             case "Leave":
                 self.messages.append(('leave', username, at))
+                Notify(default_notification_application_name = "ChatMD",
+                       default_notification_icon             = r"chatmd.ico",
+                       default_notification_title            = username,
+                       default_notification_message          = "just left !").send(block=False)
             case _:
                 if ('message', username, content, -1) in self.messages:
                     self.messages.remove(('message', username, content, -1))
+                else:
+                    if (not _preload):
+                        Notify(default_notification_application_name = "ChatMD",
+                               default_notification_icon             = r"chatmd.ico",
+                               default_notification_title            = username,
+                               default_notification_message          = content).send(block=False)
                 self.messages.append(('message', username, content, at))
