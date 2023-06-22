@@ -72,7 +72,7 @@ class TextBox(BaseSelectable):
         print_at(terminal, pos_x + offset_x, pos_y, formatted)
 
         # Draw cursor
-        if len(self._text) != 0 or self.is_selected:
+        if self.is_selected:
             cursor_pos = pos_x + min(self._curpos, self._width - len(self._prefix) - 1) \
                 + len(self._prefix) + offset_x + left_char_pos
             print_at(terminal, cursor_pos, pos_y, background + terminal.blink("_") + terminal.normal)
