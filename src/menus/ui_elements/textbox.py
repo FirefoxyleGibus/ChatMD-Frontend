@@ -40,7 +40,7 @@ class TextBox(BaseSelectable):
                 self._curpos = min(self._curpos + 1, len(self._text))
             case None if str(val):
                 if self._curpos == 0:
-                    self._text += str(val)
+                    self._text = str(val) + self._text
                     self._curpos += 1
                 else:
                     self._text = self._text[:self._curpos] + str(val) + self._text[self._curpos:]
@@ -58,7 +58,7 @@ class TextBox(BaseSelectable):
             # scroll text left and right if overflow
             if len(self._text) + len(self._prefix) > self._width:
                 start_pos = max(self._curpos - (self._width - len(self._prefix)), 0)
-                end_pos = min(self._curpos, len(self._text))
+                end_pos = max(min(self._curpos, len(self._text)), (self._width - len(self._prefix)))
                 show_text = self._text[start_pos:end_pos]
             text += show_text
         return text
@@ -76,4 +76,6 @@ class TextBox(BaseSelectable):
         if self.is_selected:
             cursor_pos = pos_x + min(self._curpos, self._width - len(self._prefix) - 1) \
                 + len(self._prefix) + offset_x + left_char_pos
-            print_at(terminal, cursor_pos, pos_y, background + terminal.blink("_") + terminal.normal)
+            rentext = self._text
+            rentext += " "
+            print_at(terminal, cursor_pos, pos_y, background + terminal.underline(rentext[self._curpos]) + terminal.normal)
