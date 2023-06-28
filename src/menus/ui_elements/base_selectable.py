@@ -4,9 +4,10 @@
 from blessed import Terminal
 from blessed.keyboard import Keystroke
 
+from src.menus.ui_elements.base_element import BaseElement
 from src.menus.ui_elements.element_style import ElementStyle
 
-class BaseSelectable():
+class BaseSelectable(BaseElement):
     """ Base Ui selectable element """
 
     SIDES = {
@@ -18,9 +19,9 @@ class BaseSelectable():
     """ Connectable sides of a selectable (override the values to disable it) """
 
     def __init__(self, style=None, attachments=None, clear_terminal_move=True):
+        super().__init__(style)
         self._attachments = {}
         # apply default style
-        self._style = style if style else ElementStyle({})
         self._is_selected = False
         self._clear_terminal = clear_terminal_move
 
