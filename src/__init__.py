@@ -16,7 +16,7 @@ def main():
 
     app.register_menu(LoginMenu())
     app.register_menu(ChatMenu())
-    app.register_menu(ExampleMenu())
+    # app.register_menu(ExampleMenu())
 
     # Start on a specific menu
     app.show_menu("login")
