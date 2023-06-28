@@ -57,13 +57,23 @@ class Button(BaseSelectable):
         if self._is_selected:
             offset_x += self._width + self._SELECT_INDICATOR_MARGIN
             anchor = self._style.get("anchor")
-            if anchor in ('left', 'center'):
-                print_at(terminal, \
-                    pos_x-offset_x, pos_y,\
-                    terminal.blink(">") + terminal.normal\
-                )
-            if anchor in ('right', 'center'):
-                print_at(terminal, \
-                    pos_x+offset_x, pos_y,\
-                    terminal.blink("<") + terminal.normal\
-                )
+            match anchor:
+                case 'left':
+                    print_at(terminal, \
+                        pos_x-self._SELECT_INDICATOR_MARGIN, pos_y,\
+                        terminal.blink(">") + terminal.normal\
+                    )
+                case 'center':
+                    print_at(terminal, \
+                        pos_x-offset_x, pos_y,\
+                        terminal.blink(">") + terminal.normal\
+                    )
+                    print_at(terminal, \
+                        pos_x+offset_x, pos_y,\
+                        terminal.blink("<") + terminal.normal\
+                    )
+                case 'right':
+                    print_at(terminal, \
+                        pos_x+offset_x, pos_y,\
+                        terminal.blink("<") + terminal.normal\
+                    )

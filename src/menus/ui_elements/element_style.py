@@ -35,7 +35,7 @@ class ElementStyle():
         """ Return the offset pos for a specified anchor """
         match self._style.get("anchor", 'left'):
             case 'left':
-                return  width+1
+                return  0
             case 'right':
                 return  -width
             case 'center':
