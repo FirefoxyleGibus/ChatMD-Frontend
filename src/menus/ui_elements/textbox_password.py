@@ -15,7 +15,8 @@ class TextBoxPassword(TextBox):
         self._hidden = True
         self._toggle_button = Button('[ ]', 3, style=ElementStyle({
                 'anchor': 'left', 
-                'align': 'right'
+                'align': 'right',
+                'background': True
             }),
             attach={'up': self}).set_on_click(self._toggle_visibility)
         self._attachments[self.SIDES.get('down')] = self._toggle_button

@@ -16,7 +16,9 @@ class Button(BaseSelectable):
 
     def __init__(self, text: str, width: int, style:ElementStyle=None, attach:dict=None):
         super().__init__(style=style if style else ElementStyle({
-            'align': 'center', 'anchor': 'center'
+            'align': 'center', 
+            'anchor': 'center', 
+            'background': True
         }), attachments=attach)
         self._text   = text
         self._width  = width
@@ -47,7 +49,7 @@ class Button(BaseSelectable):
         """ Draw the button """
         # button background + text
         aligned_text,_ = self._style.align(terminal, self._text, self._width)
-        text = terminal.reverse + aligned_text + terminal.normal
+        text = self._style.background(terminal) + aligned_text + terminal.normal
         offset_x = self._style.anchor_pos(self._width)
         print_at(terminal, pos_x + offset_x, pos_y, text)
 
