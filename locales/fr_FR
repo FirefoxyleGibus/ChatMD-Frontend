@@ -5,6 +5,7 @@ goodbye=Au revoir, {user} !
 
 username=Nom d'utilisateur
 password=Mot de passe
+autoconnect=Connexion Auto
 date_status=Il est {time} ce {date}
 
 login=Se connecter
