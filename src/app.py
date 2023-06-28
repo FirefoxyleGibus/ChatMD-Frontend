@@ -41,6 +41,7 @@ class App:
         if menu_name in self._menus:
             self._is_dirty = True
             self.current_menu = menu_name
+            self._menus[self.current_menu].start()
             return True
         return False
 
@@ -66,14 +67,16 @@ class App:
     async def _draw_screen(self):
         term = self._terminal
         self._is_running = True
-        with term.fullscreen(), term.cbreak(), term.hidden_cursor():
-            print(term.clear)
-            while self._is_running \
-                and not self.get_menu(self.current_menu).turnOff:
-                await asyncio.sleep(.01)
-                self.draw()
-                self.handle_input()
-
+        try:
+            with term.fullscreen(), term.cbreak(), term.hidden_cursor():
+                print(term.clear)
+                while self._is_running \
+                    and not self.get_menu(self.current_menu).turnOff:
+                    await asyncio.sleep(.01)
+                    self.draw()
+                    self.handle_input()
+        except KeyboardInterrupt:
+            pass
 
 
     def draw(self):

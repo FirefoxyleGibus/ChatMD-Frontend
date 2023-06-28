@@ -11,6 +11,10 @@ class BaseMenu():
     def __init__(self, name):
         self._name = name
         self._selected = None
+    
+    def start(self):
+        """ Called when shown """
+        return
 
     def get_name(self) -> str:
         """ Return the name of this menu """
