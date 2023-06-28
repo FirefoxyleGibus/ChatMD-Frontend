@@ -56,13 +56,13 @@ class Button(BaseSelectable):
         # selection effect
         if self._is_selected:
             offset_x += self._width + self._SELECT_INDICATOR_MARGIN
-            align = self._style.get("align")
-            if align in ('left', 'center'):
+            anchor = self._style.get("anchor")
+            if anchor in ('left', 'center'):
                 print_at(terminal, \
                     pos_x-offset_x, pos_y,\
                     terminal.blink(">") + terminal.normal\
                 )
-            if align in ('right', 'center'):
+            if anchor in ('right', 'center'):
                 print_at(terminal, \
                     pos_x+offset_x, pos_y,\
                     terminal.blink("<") + terminal.normal\
