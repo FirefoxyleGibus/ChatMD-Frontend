@@ -43,9 +43,11 @@ class ChatMenu(BaseMenu):
                 'anchor':'center', 'align':"left", 'background':False
             }))
         self._esc_focus = BaseSelectable()
-        self.focus_selectable(self._textbox)
 
         self._latency = 0
+    
+    def start(self):
+        self.focus_selectable(self._textbox)
 
     def set_latency(self, latency):
         """ Set the latency """
