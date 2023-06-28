@@ -5,7 +5,7 @@
 
 ## Additions
 
-- [ ] Register menu
+- [x] Register menu
 - [ ] Token local storage
 - [ ] Online users menu
 - [ ] User customization/settings menu
