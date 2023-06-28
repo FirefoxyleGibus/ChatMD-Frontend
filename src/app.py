@@ -25,6 +25,7 @@ class App:
 
         self._terminal = Terminal()
         self._is_running = True
+        self._is_dirty = True
 
         self._loop = None
         self.websocket = Connection(self)
@@ -38,6 +39,7 @@ class App:
     def show_menu(self, menu_name) -> bool:
         """ Show a menu """
         if menu_name in self._menus:
+            self._is_dirty = True
             self.current_menu = menu_name
             return True
         return False
@@ -77,6 +79,9 @@ class App:
     def draw(self):
         """ Show the current menu """
         if self.current_menu:
+            if self._is_dirty:
+                print(self._terminal.clear)
+                self._is_dirty = False
             self.get_menu(self.current_menu).draw(self._terminal)
 
     def handle_input(self):
