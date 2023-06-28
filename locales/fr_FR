@@ -1,4 +1,4 @@
-login=Salut !
+welcome_text=Salut !
 
 welcome=Bienvenu.e, {user} !
 goodbye=Au revoir, {user} !
@@ -6,6 +6,9 @@ goodbye=Au revoir, {user} !
 username=Nom d'utilisateur
 password=Mot de passe
 date_status=Il est {time} ce {date}
+
+login=Se connecter
+register=S'enregister
 
 connect=Se Connecter
 quit=Quitter
@@ -16,4 +19,5 @@ view_connected=Voir utilisateurs connectés
 wrong_credentials=Mauvais identifiants
 connection_fail=Erreur lors de la connexion
 missing_credentials=Il manque le nom d'utilisateur ou le mot de passe
-timeout=La connexion a depassé le temps d'attente 
+timeout=La connexion a depassé le temps d'attente
+existing_user=L'utilisateur existe déjà
