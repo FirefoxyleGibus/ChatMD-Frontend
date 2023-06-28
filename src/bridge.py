@@ -22,6 +22,8 @@ class Connection():
         Connection.REGISTER_ENDPOINT = f"{os.getenv('API_HTTP_ADDRESS')}/auth/register"
         Connection.WS_ENDPOINT = f"{os.getenv('API_WS_ADDRESS')}"
 
+        Connection.USERNAME_ENDPOINT = f"{os.getenv('API_HTTP_ADDRESS')}/username"
+
     def send_message(self, message):
         """ Send a message to the server """
         if self.socket:
@@ -52,27 +54,23 @@ class Connection():
 
     async def receive_messages(self):
         """ Recieve messages """
-        logging.debug(".")
         async for received_data in self.socket:
             logging.debug(received_data)
             data = json.loads(received_data)
 
             # ON JOIN
             if "messages" in data: # last posted messages
-                logging.info("Recieved Last messages: %s", data["messages"])
                 for msg in data["messages"]:
                     self._handle_new_message(msg, on_join_message=True)
                 self.app.get_menu("chat").messages.reverse()
 
             if "online" in data:
-                logging.info("Online members: %s", data["online"])
                 for member in data["online"]:
                     self.app.get_menu("chat").add_online(member["username"])
 
             if "messages" in data or "online" in data:
                 continue
 
-            logging.info("Received message: %s", data)
             # when message is just posted and we are connected
             self._handle_new_message(data)
 
