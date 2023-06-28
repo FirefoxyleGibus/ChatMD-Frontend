@@ -45,14 +45,9 @@ class Button(BaseSelectable):
         if isinstance(text, str):
             self._text = text
 
-    def draw(self, terminal: Terminal, pos_x: int, pos_y: int):
-        """ Draw the button """
-        # button background + text
-        aligned_text,_ = self._style.align(terminal, self._text, self._width)
-        text = self._style.background(terminal) + aligned_text + terminal.normal
+    def _draw_selection_effect(self, terminal: Terminal, pos_x: int, pos_y: int):
+        """ Draw the selection effect (i.e: > Button <)"""
         offset_x = self._style.anchor_pos(self._width)
-        print_at(terminal, pos_x + offset_x, pos_y, text)
-
         # selection effect
         if self._is_selected:
             offset_x += self._width + self._SELECT_INDICATOR_MARGIN
@@ -77,3 +72,13 @@ class Button(BaseSelectable):
                         pos_x+offset_x, pos_y,\
                         terminal.blink("<") + terminal.normal\
                     )
+
+    def draw(self, terminal: Terminal, pos_x: int, pos_y: int):
+        """ Draw the button """
+        # button background + text
+        aligned_text,_ = self._style.align(terminal, self._text, self._width)
+        text = self._style.background(terminal) + aligned_text + terminal.normal
+        offset_x = self._style.anchor_pos(self._width)
+        print_at(terminal, pos_x + offset_x, pos_y, text)
+
+        self._draw_selection_effect(terminal, pos_x, pos_y)
