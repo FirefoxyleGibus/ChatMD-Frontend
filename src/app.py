@@ -88,7 +88,8 @@ class App:
         """ Quit the application """
         self._is_running = False
         try:
-            self.websocket.close()
+            if self.websocket:
+                self.websocket.close()
         except RuntimeError as err:
             logging.error(err)
 

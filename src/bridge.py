@@ -91,5 +91,6 @@ class Connection():
 
     def close(self):
         """ Close the connection """
-        self.socket.close()
-        self.socket = None
+        if self.socket:
+            self.socket.close()
+            self.socket = None
