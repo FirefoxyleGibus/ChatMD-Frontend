@@ -10,7 +10,6 @@ class TextBoxPassword(TextBox):
 
     def __init__(self, width: int, prefix="", style=None, attach=None):
         super().__init__(width, "", prefix, style, attach)
-        # self._width -= 4 # space for toggle_button
         self._hidden_text = ""
         self._hidden = True
         self._toggle_button = Button('[ ]', 3, style=ElementStyle({

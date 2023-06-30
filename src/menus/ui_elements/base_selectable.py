@@ -18,8 +18,8 @@ class BaseSelectable(BaseElement):
     }
     """ Connectable sides of a selectable (override the values to disable it) """
 
-    def __init__(self, style=None, attachments=None, clear_terminal_move=True):
-        super().__init__(style)
+    def __init__(self, width, style=None, attachments=None, clear_terminal_move=True):
+        super().__init__(width, style)
         self._attachments = {}
         # apply default style
         self._is_selected = False

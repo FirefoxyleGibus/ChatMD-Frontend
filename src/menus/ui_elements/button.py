@@ -15,13 +15,12 @@ class Button(BaseSelectable):
     """ Margin from the button to the blinky > button_text < """
 
     def __init__(self, text: str, width: int, style:ElementStyle=None, attach:dict=None):
-        super().__init__(style=style if style else ElementStyle({
+        super().__init__(width, style=style if style else ElementStyle({
             'align': 'center', 
             'anchor': 'center', 
             'background': True
         }), attachments=attach)
         self._text   = text
-        self._width  = width
         # callback
         self._callback = lambda *args: None
         self._callback_args = []
