@@ -14,7 +14,7 @@ class Button(BaseSelectable):
     _SELECT_INDICATOR_MARGIN: int = 4
     """ Margin from the button to the blinky > button_text < """
 
-    def __init__(self, text: str, width: int, style:ElementStyle=None, attach:dict=None):
+    def __init__(self, text: str, width: int, style:dict=None, attach:dict=None):
         super().__init__(width, style=ElementStyle.create_with_defaults({
             'align': 'center', 
             'anchor': 'center', 

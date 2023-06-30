@@ -17,10 +17,9 @@ class TextBox(BaseSelectable):
     }
 
     def __init__(self, width: int, placeholder="", prefix="", style=None, attach: dict = None):
-        super().__init__(width, style=style if style else ElementStyle({
+        super().__init__(width, style=ElementStyle.create_with_defaults({
             'align': 'center', 'anchor': 'center', 'background': True
-        }
-        ), attachments=attach, clear_terminal_move=False)
+        }, style), attachments=attach, clear_terminal_move=False)
         self._text = ""
         self._curpos = 0
         self._placeholder = placeholder

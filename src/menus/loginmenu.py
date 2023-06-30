@@ -42,9 +42,9 @@ class LoginMenu(BaseMenu):
         self._quit_button.connect_side('up', self._auto_connect)
 
         self._register_button = Button(lang.get("register"), 10,
-            attach={'left': self._connect_button}, style=ElementStyle(style={
+            attach={'left': self._connect_button}, style={
                 'anchor': 'right', 'align': 'center', 'background': True
-            })
+            }
         ).set_on_click(App.get_instance().show_menu, 'register')
         self._connect_button.connect_side('right', self._register_button)
         self._auto_connect.connect_side('right', self._register_button)
