@@ -20,8 +20,8 @@ class ElementStyle():
         for key,val in self._defined_style_propreties.items():
             self._style[key] = style.get(key, val)
 
-    def align(self, terminal: Terminal, text: str, width: int) -> str:
-        """ Return aligned text to be drawn correctly """
+    def align(self, terminal: Terminal, text: str, width: int) -> tuple[str, int]:
+        """ Return aligned text to be drawn correctly + left char pos """
         match self._style.get("align", 'left'):
             case 'left':
                 return terminal.ljust(text, width), 0
@@ -56,3 +56,12 @@ class ElementStyle():
     def background(self, terminal):
         """ Return background code """
         return terminal.reverse if self._style["background"] else terminal.normal
+
+    @staticmethod
+    def create_with_defaults(defaults:dict, new_value:dict):
+        if new_value is None: return ElementStyle(defaults)
+
+        value = defaults
+        for name,val in new_value.items():
+            value[name] = val
+        return ElementStyle(value)
