@@ -44,6 +44,10 @@ class App:
             self._menus[self.current_menu].start()
             return True
         return False
+    
+    def clear(self):
+        """ Request clearing the terminal """
+        self._is_dirty = True
 
     def get_menu(self, menu_name):
         """ Get the menu """
