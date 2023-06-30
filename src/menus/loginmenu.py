@@ -145,6 +145,7 @@ class LoginMenu(BaseMenu):
 
             self._token_login(self._username.text, newtoken)
         except LoginException as err:
+            self._password.set_text('') # clear text
             self.status_message = lang.get(err.get_failure())
     
     def _token_login(self, username, token):
