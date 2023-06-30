@@ -5,7 +5,7 @@
 import logging
 
 from src.menus.basemenu import BaseMenu
-from src.menus.ui_elements import Button, TextBox, TextBoxPassword, ElementStyle
+from src.menus.ui_elements import Button, TextBox, TextBoxPassword, ElementStyle, DropDown
 
 class ExampleMenu(BaseMenu):
     """ Example menu class """
@@ -24,6 +24,17 @@ class ExampleMenu(BaseMenu):
                 'align': 'left', 
             }), attach={'right': centerbt })
         buttons["down"]  = Button("Bottom", self.SIZE, attach={'up': centerbt })
+
+        self._dropdown = DropDown(40, [
+            # name     # value (passed to on_change callback)
+            ('banana', 'fruit'),
+            ('chicken', 'meat'),
+            ('peach', 'fruit'),
+            ('cucumber', 'vegetable'),
+        ], attachments={
+            'down': buttons['up']
+        })
+        buttons['up'].connect_side('up', self._dropdown)
 
         self._textbox = TextBox(60, "Type text...", ">>> ", style=ElementStyle({
                 'align:':'center',
@@ -58,3 +69,4 @@ class ExampleMenu(BaseMenu):
         self._buttons["right"].draw(terminal, center_x + offset_x, center_y)
         self._textbox.draw(terminal, center_x, center_y+6)
         self._pass.draw(terminal, center_x, center_y+8)
+        self._dropdown.draw(terminal, center_x, center_y-4)
