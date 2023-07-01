@@ -18,6 +18,8 @@ class Connection():
         self.extra_headers = {}
         self.url = ""
 
+        self._run_task = None
+
         Connection.LOGIN_ENDPOINT = f"{os.getenv('API_HTTP_ADDRESS')}/auth/login"
         Connection.REGISTER_ENDPOINT = f"{os.getenv('API_HTTP_ADDRESS')}/auth/register"
         Connection.WS_ENDPOINT = f"{os.getenv('API_WS_ADDRESS')}"
@@ -27,10 +29,16 @@ class Connection():
     def send_message(self, message):
         """ Send a message to the server """
         if self.socket:
-            task = asyncio.create_task(self.socket.send(message))
+            task = asyncio.create_task(self._send(message))
             logging.debug(task) # to prevent a "Task exception was never retrieved"
         else:
             logging.error("socket is not connected")
+
+    async def _send(self, message):
+        try:
+            await self.socket.send(message)
+        except ConnectionClosed as err:
+            logging.error(err)
 
     async def run(self):
         """ Main entry of the program """
@@ -41,6 +49,9 @@ class Connection():
                 await self.receive_messages()
             except ConnectionClosed:
                 self.status = "Offline"
+                break
+            except asyncio.exceptions.CancelledError:
+                break
 
     def connect(self, url, token):
         """ connect to a endpoint """
@@ -48,7 +59,8 @@ class Connection():
         self.url = url
         self.extra_headers = {"Authorization": f"Bearer {token}"}
         logging.debug("TOKEN : %s", token)
-        asyncio.ensure_future(self.run())
+        if self._run_task is None:
+            self._run_task = asyncio.ensure_future(self.run())
         logging.debug("Running bridge")
         return self
 
@@ -89,6 +101,12 @@ class Connection():
 
     def close(self):
         """ Close the connection """
+        logging.debug("Closing bridge")
         if self.socket:
-            self.socket.close()
-            self.socket = None
+            try:
+                _ = asyncio.(self.socket.close())
+            except RuntimeError as err:
+                logging.error(err)
+        if self._run_task:
+            self._run_task.cancel()
+            self._run_task = None

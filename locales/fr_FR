@@ -12,6 +12,7 @@ login=Se connecter
 register=S'enregister
 
 connect=Se Connecter
+disconnect=Se Deconnecter
 quit=Quitter
 return_to_chat=Revenir à la conversation
 profile=Profil

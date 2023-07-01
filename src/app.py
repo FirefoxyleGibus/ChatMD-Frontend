@@ -28,6 +28,7 @@ class App:
         self._is_dirty = True
 
         self._loop = None
+        self._run_task = None
         self.websocket = Connection(self)
 
         App.instance = self
@@ -59,7 +60,7 @@ class App:
         print("Application starting")
         self._loop = asyncio.get_event_loop()
         try:
-            asyncio.ensure_future(self._draw_screen())
+            self._run_task = asyncio.ensure_future(self._draw_screen())
             self._loop.run_forever()
         except KeyboardInterrupt:
             pass
@@ -105,8 +106,12 @@ class App:
         except RuntimeError as err:
             logging.error(err)
 
+        if self._run_task:
+            self._run_task.cancel()
+
         if self._loop:
             self._loop.stop()
+            self._loop.close()
 
     @staticmethod
     def get_instance():

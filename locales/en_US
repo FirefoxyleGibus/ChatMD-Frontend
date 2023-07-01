@@ -12,6 +12,7 @@ login=Log in
 register=Register
 
 connect=Connect
+disconnect=Disconnect
 quit=Quit
 return_to_chat=Return to discussion
 profile=Profil
