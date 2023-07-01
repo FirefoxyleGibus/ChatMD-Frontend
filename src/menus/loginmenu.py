@@ -130,7 +130,6 @@ class LoginMenu(BaseMenu):
     def _login_button(self):
         user_settings = App.get_instance().user_settings
         lang = user_settings.get_locale()
-        self._password.set_text('') # clear text
         try:
             newtoken = self.login(self._username.text, self._password.text)
             self.status_message = ""
