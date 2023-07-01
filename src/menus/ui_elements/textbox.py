@@ -58,6 +58,7 @@ class TextBox(BaseSelectable):
     def set_text(self, new_text: str) -> None:
         """ Set the content of this textbox """
         self._text = new_text
+        self._curpos = len(new_text)
 
     def _visible_text(self):
         return self._text
