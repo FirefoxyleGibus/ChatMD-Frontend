@@ -104,7 +104,7 @@ class Connection():
         logging.debug("Closing bridge")
         if self.socket:
             try:
-                _ = asyncio.(self.socket.close())
+                _ = asyncio.create_task(self.socket.close())
             except RuntimeError as err:
                 logging.error(err)
         if self._run_task:
