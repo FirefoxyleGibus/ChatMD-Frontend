@@ -106,6 +106,7 @@ class RegisterMenu(BaseMenu):
 
     def _register_button(self):
         lang = App.get_instance().user_settings.get_locale()
+        self._password.set_text('') # clear text
         try:
             newtoken = self.register(self._username.text, self._password.text)
             self.status_message = ""
@@ -115,7 +116,6 @@ class RegisterMenu(BaseMenu):
             app.get_menu("chat").name = self._username.text
             app.get_menu("chat").connect(app.token)
         except LoginException as err:
-            self._password.set_text('') # clear text
             self.status_message = lang.get(err.get_failure())
 
     def handle_input(self, terminal) -> None:
