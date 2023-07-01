@@ -115,8 +115,8 @@ class RegisterMenu(BaseMenu):
             app.get_menu("chat").name = self._username.text
             app.get_menu("chat").connect(app.token)
         except LoginException as err:
-            self._password.set_text('') # clear text
             self.status_message = lang.get(err.get_failure())
+        self._password.set_text('') # clear text
 
     def handle_input(self, terminal) -> None:
         val = super().handle_input(terminal)
