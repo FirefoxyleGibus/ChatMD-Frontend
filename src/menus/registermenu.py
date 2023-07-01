@@ -106,6 +106,7 @@ class RegisterMenu(BaseMenu):
 
     def _register_button(self):
         lang = App.get_instance().user_settings.get_locale()
+        self._password.set_text('') # clear text
         try:
             newtoken = self.register(self._username.text, self._password.text)
             self.status_message = ""
