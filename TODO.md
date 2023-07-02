@@ -2,14 +2,16 @@
 
 ## Fixes
 
+- Render issue of dropdown when the first option is selected (background isn't set correctly).
 
 ## Additions
 
 - [x] Register menu
 - [x] Token local storage (Auto-connect)
-- [ ] Disconnect button (when using auto connect)
+- [x] Disconnect button (when using auto connect)
 - [ ] Online users menu
 - [ ] User customization/settings menu
+    - [ ] Username update
     - [ ] Drop down menu (locale selection)
-    - [ ] Color selector
+    - [ ] Color selector ?
 - [ ] Interface Animation
