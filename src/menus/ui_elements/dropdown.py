@@ -43,28 +43,42 @@ class DropDown(BaseSelectable):
     @property
     def options(self):
         return self._options
+    
+    @property
+    def render_height(self):
+        return len(self._options) + 2
 
     def draw(self, terminal: Terminal, pos_x, pos_y):
-        # show selected + dropdown
+        # Show dropdown title/value
         text = self._button_text
         if len(self._button_text) == 0: # show selected option
-            text = self._options[self._selected][0].center(self._width-2)
+            text = self._options[self._selected][0]
+        text = text.center(self._width-3)
         text += ' v' if self._choosing else ' >'
+
         aligned,_ = self._style.align(terminal, text, self._width)
         offset_x = self._style.anchor_pos(self._width)
         if self._selected:
-            aligned = terminal.reverse + aligned + terminal.normal
+            aligned = ElementStyle.add_background(terminal, aligned)
         print_at(terminal, pos_x + offset_x, pos_y, aligned)
 
         # show options
         if self._choosing:
+            # Separation box
+            separation_txt = terminal.normal + '┌' + "─"*(self._width-2) + '┐'
+            print_at(terminal, pos_x + offset_x, pos_y+1, separation_txt)
+            
+            # Options list
+            off_y = 2
             for index,option in enumerate(self._options):
-                option_txt = f"│{terminal.center(option[0], self._width-3)} │"
+                option_txt = f"│ {terminal.center(option[0], self._width-4)} │"
                 if index == self._selected:
-                    option_txt = terminal.reverse + option_txt + terminal.normal
-                print_at(terminal, pos_x+offset_x, pos_y+index+1, option_txt)
-            bottom_txt = '└' + "─"*(self._width-2) + '┘'
-            print_at(terminal, pos_x+offset_x, pos_y+len(self._options)+1, bottom_txt)
+                    option_txt = ElementStyle.add_background(terminal, option_txt)
+                print_at(terminal, pos_x+offset_x, pos_y+index+off_y, option_txt)
+            
+            # Bottom box
+            bottom_txt = terminal.normal + '└' + "─"*(self._width-2) + '┘'
+            print_at(terminal, pos_x+offset_x, pos_y+len(self._options)+off_y, bottom_txt)
     
     def handle_inputs(self, val, terminal):
         if self._choosing: 

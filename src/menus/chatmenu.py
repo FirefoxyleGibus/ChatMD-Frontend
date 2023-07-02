@@ -127,16 +127,17 @@ class ChatMenu(BaseMenu):
         print_at(terminal, 0, terminal.height-3, "─"*terminal.width)
         self._textbox.draw(terminal, terminal.width//2, terminal.height - 2)
         
+        # connection status
+        latency = terminal.center(f"{self._latency}ms", 6)
+        topright = f"   {self.connection.status} | {latency} | {len(self._online_members)} online"
+        print_at(terminal, terminal.width-len(topright), 0, topright)
+        
         # Esc menu
         if self._esc_menu.is_selected:
             self._esc_menu.draw(terminal, 0, 0)
-            self._draw_messages(terminal, max_message_draw_pos=len(self._esc_menu.options)+1, start_pos=4)
+            self._draw_messages(terminal, max_message_draw_pos=self._esc_menu.render_height, start_pos=4)
         else:
             self._draw_messages(terminal, start_pos=4)
-            # connection status
-            latency = terminal.center(f"{self._latency}ms", 6)
-            topright = f"   {self.connection.status} | {latency} | {len(self._online_members)} online"
-            print_at(terminal, terminal.width-len(topright), 0, topright)
 
             print_at(terminal, 1, 0, f"#{self.channel}")
             print_at(terminal, 0, 1, "─"*terminal.width)
