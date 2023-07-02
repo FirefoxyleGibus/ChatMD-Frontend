@@ -5,7 +5,7 @@
 import logging
 
 from src.menus.basemenu import BaseMenu
-from src.menus.ui_elements import Button, TextBox, TextBoxPassword, ElementStyle, DropDown
+from src.menus.ui_elements import Button, TextBox, TextBoxPassword, DropDown
 
 class ExampleMenu(BaseMenu):
     """ Example menu class """
@@ -17,10 +17,10 @@ class ExampleMenu(BaseMenu):
         buttons = {}
         centerbt = Button("Center", self.SIZE)
         buttons["up"]    = Button("Top", self.SIZE, attach={'down': centerbt})
-        buttons["right"] = Button("Right", self.SIZE, style=ElementStyle({
+        buttons["right"] = Button("Right", self.SIZE, style=({
                 'align': 'right', 
             }), attach={'left': centerbt })
-        buttons["left"]  = Button("Left", self.SIZE, style=ElementStyle({
+        buttons["left"]  = Button("Left", self.SIZE, style=({
                 'align': 'left', 
             }), attach={'right': centerbt })
         buttons["down"]  = Button("Bottom", self.SIZE, attach={'up': centerbt })
@@ -36,7 +36,7 @@ class ExampleMenu(BaseMenu):
         })
         buttons['up'].connect_side('up', self._dropdown)
 
-        self._textbox = TextBox(60, "Type text...", ">>> ", style=ElementStyle({
+        self._textbox = TextBox(60, "Type text...", ">>> ", style=({
                 'align:':'center',
                 'anchor':'left',
                 'background': True

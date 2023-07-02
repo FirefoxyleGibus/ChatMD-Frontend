@@ -47,7 +47,7 @@ class ToggleButton(Button):
         aligned,_ = self._style.align(terminal, self._text, self._width)
         offset_x = self._style.anchor_pos(self._width)
 
-        print_at(terminal, pos_x+offset_x, pos_y, terminal.normal + aligned)
+        print_at(terminal, pos_x+offset_x, pos_y, aligned)
 
 
     def active(self):
