@@ -4,6 +4,7 @@
 
 import logging
 
+from src.termutil import print_at
 from .basemenu import BaseMenu
 from .ui_elements import Button, TextBox, TextBoxPassword, DropDown
 
@@ -33,7 +34,8 @@ class ExampleMenu(BaseMenu):
             ('cucumber', 'vegetable'),
         ], attachments={
             'down': buttons['up']
-        })
+        }).set_on_change(self._set_choice)
+        self._dropdown_value = ''
         buttons['up'].connect_side('up', self._dropdown)
 
         self._textbox = TextBox(60, "Type text...", ">>> ", style=({
@@ -55,6 +57,9 @@ class ExampleMenu(BaseMenu):
     def _log(self, message):
         """ Log something """
         logging.debug("DebugMenu says: %s", message)
+    
+    def _set_choice(self, new_value):
+        self._dropdown_value = new_value
 
     def draw(self, terminal):
         super().draw(terminal)
@@ -70,3 +75,5 @@ class ExampleMenu(BaseMenu):
         self._textbox.draw(terminal, center_x, center_y+6)
         self._pass.draw(terminal, center_x, center_y+8)
         self._dropdown.draw(terminal, center_x, center_y-4)
+
+        print_at(terminal, 0, 2, self._dropdown_value)

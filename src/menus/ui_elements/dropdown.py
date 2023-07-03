@@ -38,8 +38,12 @@ class DropDown(BaseSelectable):
         self._callback_kwargs = callback_kwargs
         return self
 
-    def set_choosing(self, value:bool):
+    def set_choosing(self, value:bool, starting_option=None):
+        """ Set choosing state of this dropdown """
         self._choosing = value
+        if not (starting_option is None):
+            self._selected = min(len(self._options)-1, max(0, starting_option))
+
 
     def set_options(self, options):
         """ Set options list 
@@ -93,9 +97,9 @@ class DropDown(BaseSelectable):
                 case "KEY_ENTER" | "KEY_ESCAPE":
                     self._choosing = False
                     # update user
-                    new_value = self._options[self._selected][1] 
                     if val.name == "KEY_ESCAPE":
-                        new_value = self._options[self._previous_choice][1]
+                        self._selected = self._previous_choice
+                    new_value = self._options[self._selected][1] 
                     self._callback(new_value, *self._callback_args, **self._callback_kwargs)
                     print(terminal.clear)
                 case "KEY_DOWN":
