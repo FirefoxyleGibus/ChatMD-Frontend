@@ -10,7 +10,7 @@
 - [x] Register menu
 - [x] Token local storage (Auto-connect)
 - [x] Disconnect button (when using auto connect)
-- [ ] Online users menu
+- [x] Online users menu (require testing plz)
 - [ ] User customization/settings menu
     - [ ] Username update
     - [ ] Drop down menu (locale selection)

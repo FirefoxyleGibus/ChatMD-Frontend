@@ -114,7 +114,14 @@ class ChatMenu(BaseMenu):
                 # adios
                 app.quit()
             case "profile":
-                pass
+                # Yeee baby
+                logging.debug("profile username")
+                app.get_menu("profile").set_username(self.name)
+                logging.debug("profile lang")
+                app.get_menu("profile").set_lang(app.user_settings.get("locale"))
+                logging.debug("Showing profile?")
+                app.show_menu("profile")
+                return self._textbox
             case "view_connected":
                 # update user list
                 self._users_list_menu.set_options([(username, username) for username in self._online_members])
