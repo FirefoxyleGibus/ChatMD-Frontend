@@ -14,6 +14,9 @@ class TextBox(BaseSelectable):
     SIDES = {
         'down':  0,
         'up':    1,
+
+        'next': 2,
+        'prev': 3,
     }
 
     def __init__(self, width: int, placeholder="", prefix="", style=None, attach: dict = None):

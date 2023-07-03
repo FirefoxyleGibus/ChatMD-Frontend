@@ -27,7 +27,7 @@ class Button(BaseSelectable):
         self._callback_kwargs = {}
 
     def set_on_click(self, callback: callable, *args, **kwargs):
-        """ Set the callbcak on click """
+        """ Set the callback on click """
         self._callback = callback.__call__
         self._callback_args = args
         self._callback_kwargs = kwargs

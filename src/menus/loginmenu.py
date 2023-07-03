@@ -24,22 +24,26 @@ class LoginMenu(BaseMenu):
         lang = App.get_instance().user_settings.get_locale()
         self._username = TextBox(40)
 
-        self._password = TextBoxPassword(40, attach={'up': self._username})
+        self._password = TextBoxPassword(40, attach={'up': self._username, 'prev': self._username})
         self._username.connect_side('down', self._password)
+        self._username.connect_side('next', self._password)
 
         self._connect_button = Button(lang.get("connect"), 20,
-            attach={'up': self._password}).set_on_click(self._login_button)
+            attach={'up': self._password, 'prev': self._password}).set_on_click(self._login_button)
         self._password.connect_side('down', self._connect_button)
+        self._password.connect_side('next', self._connect_button)
 
         self._quit_button = Button(lang.get("quit"), 20,
-            attach={'up': self._connect_button}).set_on_click(App.get_instance().quit)
+            attach={'up': self._connect_button, 'prev': self._connect_button}).set_on_click(App.get_instance().quit)
 
         self._auto_connect = ToggleButton(label=lang.get('autoconnect'), attach={
-            'up': self._connect_button,
-            'down': self._quit_button
+            'up': self._connect_button, 'prev': self._connect_button,
+            'down': self._quit_button,  'next': self._quit_button,
         })
         self._connect_button.connect_side('down', self._auto_connect)
+        self._connect_button.connect_side('next', self._auto_connect)
         self._quit_button.connect_side('up', self._auto_connect)
+        self._quit_button.connect_side('prev', self._auto_connect)
 
         self._register_button = Button(lang.get("register"), 10,
             attach={'left': self._connect_button}, style={
