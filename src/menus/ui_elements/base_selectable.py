@@ -82,6 +82,7 @@ class BaseSelectable(BaseElement):
     
     def _switch_to(self, target):
         """ Switch to other thing """
+        if target == self: return
         self.deselect()
         if self._clear_terminal:
             App.get_instance().clear()
