@@ -4,8 +4,8 @@
 from blessed import Terminal
 from blessed.keyboard import Keystroke
 
-from src.menus.ui_elements.base_selectable import BaseSelectable
-from src.menus.ui_elements.element_style import ElementStyle
+from .base_selectable import BaseSelectable
+from .element_style import ElementStyle
 from src.termutil import print_at
 
 class Button(BaseSelectable):

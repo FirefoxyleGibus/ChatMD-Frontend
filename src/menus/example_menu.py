@@ -4,8 +4,8 @@
 
 import logging
 
-from src.menus.basemenu import BaseMenu
-from src.menus.ui_elements import Button, TextBox, TextBoxPassword, DropDown
+from .basemenu import BaseMenu
+from .ui_elements import Button, TextBox, TextBoxPassword, DropDown
 
 class ExampleMenu(BaseMenu):
     """ Example menu class """

@@ -1,9 +1,9 @@
 """
     TextBoxPassword class file
 """
-from src.menus.ui_elements.textbox import TextBox
-from src.menus.ui_elements.element_style import ElementStyle
-from src.menus.ui_elements.button import Button
+from .textbox import TextBox
+from .element_style import ElementStyle
+from .button import Button
 
 class TextBoxPassword(TextBox):
     """ password Textbox """

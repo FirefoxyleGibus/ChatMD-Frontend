@@ -5,8 +5,8 @@
 import logging
 from blessed import Terminal
 
-from src.menus.ui_elements.element_style import ElementStyle
-from src.menus.ui_elements.base_selectable import BaseSelectable
+from .element_style import ElementStyle
+from .base_selectable import BaseSelectable
 from src.termutil import print_at
 
 class DropDown(BaseSelectable):
@@ -17,6 +17,7 @@ class DropDown(BaseSelectable):
         }, style), attachments=attachments)
         self._options  = options
         self._selected = selected
+        self._previous_choice = selected
         self._choosing = False
         self._button_text = button_text
 
@@ -39,6 +40,12 @@ class DropDown(BaseSelectable):
 
     def set_choosing(self, value:bool):
         self._choosing = value
+
+    def set_options(self, options):
+        """ Set options list 
+            :options: list of tuple[name, value]
+        """
+        self._options = options
     
     @property
     def options(self):
@@ -86,7 +93,10 @@ class DropDown(BaseSelectable):
                 case "KEY_ENTER" | "KEY_ESCAPE":
                     self._choosing = False
                     # update user
-                    self._callback(self._options[self._selected][1], *self._callback_args, **self._callback_kwargs)
+                    new_value = self._options[self._selected][1] 
+                    if val.name == "KEY_ESCAPE":
+                        new_value = self._options[self._previous_choice][1]
+                    self._callback(new_value, *self._callback_args, **self._callback_kwargs)
                     print(terminal.clear)
                 case "KEY_DOWN":
                     self._selected = (self._selected + 1) % len(self._options)
@@ -97,6 +107,7 @@ class DropDown(BaseSelectable):
         else:
             if val.name == "KEY_ENTER":
                 self._choosing = True
+                self._previous_choice = self._selected
             else:
                 return super().handle_inputs(val, terminal)
         return self

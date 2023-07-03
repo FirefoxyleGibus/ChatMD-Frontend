@@ -99,14 +99,13 @@ class Connection():
             case "latency":
                 self.app.get_menu("chat").set_latency(data["latency_ms"])
 
-    def close(self):
+    async def close(self):
         """ Close the connection """
         logging.debug("Closing bridge")
-        if self.socket:
-            try:
-                _ = asyncio.create_task(self.socket.close())
-            except RuntimeError as err:
-                logging.error(err)
         if self._run_task:
             self._run_task.cancel()
             self._run_task = None
+
+        if self.socket:
+            await self.socket.close()
+        

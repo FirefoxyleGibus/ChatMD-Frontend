@@ -2,7 +2,7 @@
     Base Element
 """
 
-from src.menus.ui_elements.element_style import ElementStyle
+from .element_style import ElementStyle
 
 class BaseElement():
     def __init__(self, width, style=None):
@@ -12,3 +12,8 @@ class BaseElement():
     def draw(self, _terminal, _pos_x, _pos_y):
         """ Draw the element """
         return
+    
+    @property
+    def width(self) -> int:
+        """ Width of the element """
+        return self._width

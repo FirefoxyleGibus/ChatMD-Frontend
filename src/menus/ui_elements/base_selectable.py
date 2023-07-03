@@ -4,8 +4,8 @@
 from blessed import Terminal
 from blessed.keyboard import Keystroke
 
-from src.menus.ui_elements.base_element import BaseElement
-from src.menus.ui_elements.element_style import ElementStyle
+from .base_element import BaseElement
+from .element_style import ElementStyle
 from src.app import App
 
 class BaseSelectable(BaseElement):

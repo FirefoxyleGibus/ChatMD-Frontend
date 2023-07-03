@@ -7,7 +7,7 @@ from blessed import Terminal
 from dotenv import load_dotenv
 
 
-from src.bridge import Connection
+from .bridge import Connection
 
 # setup logging
 logging.basicConfig(level=logging.DEBUG, filename="debug_log.txt", filemode="w")
@@ -100,9 +100,13 @@ class App:
     def quit(self):
         """ Quit the application """
         self._is_running = False
+        _ = asyncio.create_task(self._quit_task())
+        
+    
+    async def _quit_task(self):
         try:
             if self.websocket:
-                self.websocket.close()
+                await self.websocket.close()
         except RuntimeError as err:
             logging.error(err)
 
@@ -111,7 +115,6 @@ class App:
 
         if self._loop:
             self._loop.stop()
-            self._loop.close()
 
     @staticmethod
     def get_instance():

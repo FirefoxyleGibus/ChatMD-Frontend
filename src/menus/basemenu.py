@@ -5,7 +5,7 @@ import logging
 from blessed import Terminal
 
 from src.termutil import print_at
-from src.menus.ui_elements.base_selectable import BaseSelectable
+from .ui_elements.base_selectable import BaseSelectable
 
 
 class BaseMenu():

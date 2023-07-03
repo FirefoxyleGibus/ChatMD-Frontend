@@ -10,7 +10,7 @@ except ImportError:
 
 from src.user_prefs import CONFIG_FILE
 
-from src.user_prefs.locales import Locale
+from .locales import Locale
 
 class UserSettings:
     """ User settings """

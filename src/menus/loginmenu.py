@@ -7,11 +7,11 @@ import json
 import logging
 import requests
 
-from src.menus.basemenu import BaseMenu
-from src.menus.ui_elements import TextBox, TextBoxPassword, Button, ElementStyle, ToggleButton
+from .basemenu import BaseMenu
+from .ui_elements import TextBox, TextBoxPassword, Button, ElementStyle, ToggleButton
 from src.termutil import print_at
 from src.app import App
-from src.menus.loginexception import LoginException
+from .loginexception import LoginException
 from src.bridge import Connection
 
 class LoginMenu(BaseMenu):
