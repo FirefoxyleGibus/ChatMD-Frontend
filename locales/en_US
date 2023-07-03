@@ -8,6 +8,9 @@ password=Password
 autoconnect=Auto-Connect
 date_status=It's {time} on {date}
 
+menu=Menu
+online_users=Online users
+
 login=Log in
 register=Register
 

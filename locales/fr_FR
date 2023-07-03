@@ -8,6 +8,9 @@ password=Mot de passe
 autoconnect=Connexion Auto
 date_status=Il est {time} ce {date}
 
+menu=Menu
+online_users=Utilisateurs actifs
+
 login=Se connecter
 register=S'enregister
 

@@ -80,13 +80,17 @@ class BaseSelectable(BaseElement):
                 ret = self._handle_selection_input('prev') 
         return ret
     
+    def _switch_to(self, target):
+        """ Switch to other thing """
+        self.deselect()
+        if self._clear_terminal:
+            App.get_instance().clear()
+        target.select()
+
     def _handle_selection_input(self, side):
         if self._connected_to(side):
-            self.deselect()
             ret = self._attachments.get(self.SIDES.get(side))
-            if self._clear_terminal:
-                App.get_instance().clear()
-            ret.select()
+            self._switch_to(ret)
             return ret
         return self
 

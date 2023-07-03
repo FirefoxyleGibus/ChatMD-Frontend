@@ -1,11 +1,13 @@
 """
     ChatMenu class file
 """
+import asyncio
+import logging
 from notifypy import Notify
 
-from src.menus.basemenu import BaseMenu
-from src.menus.ui_elements import TextBox, ElementStyle, DropDown
-from src.menus.ui_elements.base_selectable import BaseSelectable
+from .basemenu import BaseMenu
+from .ui_elements import TextBox, ElementStyle, DropDown
+from .ui_elements.base_selectable import BaseSelectable
 from src.app import App
 from src.bridge import Connection
 from src.termutil import print_at, color_text
@@ -36,13 +38,17 @@ class ChatMenu(BaseMenu):
         })
         
         lang = App.get_locale();
-        self._esc_menu = DropDown(40, button_text=lang.get('Menu'), options=[
+        self._esc_menu = DropDown(40, button_text=lang.get('menu'), options=[
             (lang.get("return_to_chat"), "return_to_chat"),
             (lang.get("profile"),        "profile"),
             (lang.get("view_connected"), "view_connected"),
             (lang.get("disconnect"),     "disconnect"),
             (lang.get("quit"),           "quit"),
         ], style={'anchor': 'left'}).set_on_change(self._execute_esc_button)
+
+        self._users_list_menu = DropDown(40, button_text=lang.get("online_users"), 
+            options=[('', '')], style={'anchor': 'left'}
+        ).set_on_change(self._close_users_list)
 
         self._latency = 0
     
@@ -105,21 +111,35 @@ class ChatMenu(BaseMenu):
         app = App.get_instance()
         match button:
             case "quit":
+                # adios
                 app.quit()
             case "profile":
                 pass
             case "view_connected":
-                pass
+                # update user list
+                self._users_list_menu.set_options([(username, username) for username in self._online_members])
+                self._users_list_menu.set_choosing(True)
+                # force it to show menu bcoz its pretty
+                self._esc_menu.set_choosing(True)
+                return self._users_list_menu
             case "disconnect":
+                # smaller adios (with abandonment issues ig plz fix it)
+                # FIX: fix killing connection
                 if self.connection:
-                    self.connection.close()
+                    _ = asyncio.create_task(self.connection.close())
                 # remove auto connect
                 app.user_settings.set("auto_connect", False)
                 app.user_settings.set("session_token", '')
                 app.show_menu("login")
+                # close menu
+                return self._textbox
             case _:
-                self.focus_selectable(self._textbox)
-                app.clear()
+                # get back to real stuff bby
+                return self._textbox
+        
+    def _close_users_list(self, _value):
+        self._esc_menu.set_choosing(True)
+        return self._esc_menu
 
     def draw(self, terminal) -> None:
         self._textbox.resize(terminal.width-1)
@@ -136,6 +156,11 @@ class ChatMenu(BaseMenu):
         if self._esc_menu.is_selected:
             self._esc_menu.draw(terminal, 0, 0)
             self._draw_messages(terminal, max_message_draw_pos=self._esc_menu.render_height, start_pos=4)
+        elif self._users_list_menu.is_selected:
+            self._esc_menu.draw(terminal, 0, 0)
+            self._users_list_menu.draw(terminal, self._esc_menu.width + 2, 0)
+            self._draw_messages(terminal,
+                max_message_draw_pos=max(self._esc_menu.render_height, self._users_list_menu.render_height), start_pos=4)
         else:
             self._draw_messages(terminal, start_pos=4)
 
@@ -151,7 +176,7 @@ class ChatMenu(BaseMenu):
                 print(terminal.clear)
                 self.connection.send_message(self._textbox.text)
                 self._textbox.set_text("")
-        elif val.name == "KEY_ESCAPE":
+        elif val.name == "KEY_ESCAPE" and self._textbox.is_selected:
             self.focus_selectable(self._esc_menu)
             self._esc_menu.set_choosing(True)
             print(terminal.clear)

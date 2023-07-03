@@ -21,7 +21,7 @@ class DropDown(BaseSelectable):
         self._choosing = False
         self._button_text = button_text
 
-        self._callback = lambda *args: None
+        self._callback = lambda *args: self
         self._callback_args = []
         self._callback_kwargs = {}
         
@@ -92,6 +92,7 @@ class DropDown(BaseSelectable):
             print_at(terminal, pos_x+offset_x, pos_y+len(self._options)+off_y, bottom_txt)
     
     def handle_inputs(self, val, terminal):
+        ret = self
         if self._choosing: 
             match val.name:
                 case "KEY_ENTER" | "KEY_ESCAPE":
@@ -100,8 +101,8 @@ class DropDown(BaseSelectable):
                     if val.name == "KEY_ESCAPE":
                         self._selected = self._previous_choice
                     new_value = self._options[self._selected][1] 
-                    self._callback(new_value, *self._callback_args, **self._callback_kwargs)
                     print(terminal.clear)
+                    ret = self._callback(new_value, *self._callback_args, **self._callback_kwargs)
                 case "KEY_DOWN":
                     self._selected = (self._selected + 1) % len(self._options)
                 case "KEY_UP":
@@ -113,5 +114,6 @@ class DropDown(BaseSelectable):
                 self._choosing = True
                 self._previous_choice = self._selected
             else:
-                return super().handle_inputs(val, terminal)
-        return self
+                ret = super().handle_inputs(val, terminal)
+        self._switch_to(ret)
+        return ret
