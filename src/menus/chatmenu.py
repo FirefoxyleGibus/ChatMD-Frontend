@@ -36,8 +36,8 @@ class ChatMenu(BaseMenu):
         self._textbox = TextBox(1, "", ">>> ", style={
             'anchor':'center', 'align':"left", 'background':False
         })
-        
-        lang = App.get_locale();
+
+        lang = App.get_locale()
         self._esc_menu = DropDown(40, button_text=lang.get('menu'), options=[
             (lang.get("return_to_chat"), "return_to_chat"),
             (lang.get("profile"),        "profile"),
@@ -51,7 +51,7 @@ class ChatMenu(BaseMenu):
         ).set_on_change(self._close_users_list)
 
         self._latency = 0
-    
+
     def start(self):
         self.focus_selectable(self._textbox)
         self.messages = []
@@ -124,7 +124,8 @@ class ChatMenu(BaseMenu):
                 return self._textbox
             case "view_connected":
                 # update user list
-                self._users_list_menu.set_options([(username, username) for username in self._online_members])
+                self._users_list_menu.set_options([(username, username) \
+                                                   for username in self._online_members])
                 self._users_list_menu.set_choosing(True)
                 # force it to show menu bcoz its pretty
                 self._esc_menu.set_choosing(True)
@@ -143,7 +144,7 @@ class ChatMenu(BaseMenu):
             case _:
                 # get back to real stuff bby
                 return self._textbox
-        
+
     def _close_users_list(self, _value):
         self._esc_menu.set_choosing(True)
         return self._esc_menu
@@ -153,21 +154,23 @@ class ChatMenu(BaseMenu):
 
         print_at(terminal, 0, terminal.height-3, "─"*terminal.width)
         self._textbox.draw(terminal, terminal.width//2, terminal.height - 2)
-        
+
         # connection status
         latency = terminal.center(f"{self._latency}ms", 6)
         topright = f"   {self.connection.status} | {latency} | {len(self._online_members)} online"
         print_at(terminal, terminal.width-len(topright), 0, topright)
-        
+
         # Esc menu
         if self._esc_menu.is_selected:
             self._esc_menu.draw(terminal, 0, 0)
-            self._draw_messages(terminal, max_message_draw_pos=self._esc_menu.render_height, start_pos=4)
+            self._draw_messages(terminal,
+                                max_message_draw_pos=self._esc_menu.render_height, start_pos=4)
         elif self._users_list_menu.is_selected:
             self._esc_menu.draw(terminal, 0, 0)
             self._users_list_menu.draw(terminal, self._esc_menu.width + 2, 0)
             self._draw_messages(terminal,
-                max_message_draw_pos=max(self._esc_menu.render_height, self._users_list_menu.render_height), start_pos=4)
+                max_message_draw_pos=max(self._esc_menu.render_height, 
+                                         self._users_list_menu.render_height), start_pos=4)
         else:
             self._draw_messages(terminal, start_pos=4)
 

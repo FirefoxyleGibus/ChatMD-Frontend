@@ -2,8 +2,8 @@
 
 ## Fixes
 
-- Render issue of dropdown when the first option is selected (background isn't set correctly).
-- Disconnect doesn't kill the other socket and we end up with x times sockets with the previous user...
+- [x] Render issue of dropdown when the first option is selected (background isn't set correctly).
+- [ ] Disconnect doesn't kill the other socket and we end up with x times sockets with the previous user...
 
 ## Additions
 

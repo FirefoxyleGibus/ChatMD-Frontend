@@ -105,11 +105,11 @@ class ElementStyle():
                         glitchify_next = True
                         continue
                     case _ if code.startswith("cb"):
-                        col = color_code_from_hex(code.replace("cb ", "", 1))
+                        col = Color.color_code_from_hex(code.replace("cb ", "", 1))
                         rendered_text += terminal.on_color_rgb(col[0], col[1], col[2])
                         continue
                     case _ if code.startswith("cf"):
-                        col = color_code_from_hex(code.replace("cf ", "", 1))
+                        col = Color.color_code_from_hex(code.replace("cf ", "", 1))
                         rendered_text += terminal.color_rgb(col[0], col[1], col[2])
                         continue
                     case _ if glitchify_next:
