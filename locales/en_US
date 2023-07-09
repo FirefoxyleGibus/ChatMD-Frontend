@@ -17,6 +17,7 @@ register=Register
 connect=Connect
 disconnect=Disconnect
 quit=Quit
+save=Save
 return_to_chat=Return to discussion
 profile=Profil
 view_connected=View online users
