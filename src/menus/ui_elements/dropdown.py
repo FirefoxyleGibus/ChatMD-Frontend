@@ -92,6 +92,14 @@ class DropDown(BaseSelectable):
             bottom_txt = terminal.normal + '└' + "─"*(self._width-2) + '┘'
             print_at(terminal, pos_x+offset_x, pos_y+len(self._options)+off_y, bottom_txt)
 
+    @property
+    def value(self):
+        return self.options[self._opt_select][1]
+
+    @property
+    def value_text(self):
+        return self.options[self._opt_select][0]
+
     def handle_inputs(self, val, terminal):
         ret = self
         if self._choosing:
