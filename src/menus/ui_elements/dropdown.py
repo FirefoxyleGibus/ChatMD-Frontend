@@ -17,7 +17,7 @@ class DropDown(BaseSelectable):
             'align': 'center', 'anchor': 'center', 'background': False
         }, style), attachments=attachments)
         self._options  = options
-        self._selected = selected
+        self._opt_select = selected
         self._previous_choice = selected
         self._choosing = False
         self._button_text = button_text
@@ -43,7 +43,7 @@ class DropDown(BaseSelectable):
         """ Set choosing state of this dropdown """
         self._choosing = value
         if not (starting_option is None):
-            self._selected = min(len(self._options)-1, max(0, starting_option))
+            self._opt_select = min(len(self._options)-1, max(0, starting_option))
 
 
     def set_options(self, options):
@@ -64,13 +64,13 @@ class DropDown(BaseSelectable):
         # Show dropdown title/value
         text = self._button_text
         if len(self._button_text) == 0: # show selected option
-            text = self._options[self._selected][0]
+            text = self._options[self._opt_select][0]
         text = text.center(self._width-3)
         text += ' v' if self._choosing else ' >'
 
         aligned,_ = self._style.align(terminal, text, self._width)
         offset_x = self._style.anchor_pos(self._width)
-        if self._selected or self._selected == 0:
+        if self._opt_select or self._opt_select == 0:
             aligned = ElementStyle.add_background(terminal, aligned)
         print_at(terminal, pos_x + offset_x, pos_y, aligned)
 
@@ -84,7 +84,7 @@ class DropDown(BaseSelectable):
             off_y = 2
             for index,option in enumerate(self._options):
                 option_txt = f"│ {terminal.center(option[0], self._width-4)} │"
-                if index == self._selected:
+                if index == self._opt_select:
                     option_txt = ElementStyle.add_background(terminal, option_txt)
                 print_at(terminal, pos_x+offset_x, pos_y+index+off_y, option_txt)
 
@@ -100,18 +100,18 @@ class DropDown(BaseSelectable):
                     self._choosing = False
                     # update user
                     if val.name == "KEY_ESCAPE":
-                        self._selected = self._previous_choice
-                    new_value = self._options[self._selected][1] 
+                        self._opt_select = self._previous_choice
+                    new_value = self._options[self._opt_select][1] 
                     print(terminal.clear)
                     ret = self._callback(new_value, *self._callback_args, **self._callback_kwargs)
                 case "KEY_DOWN":
-                    self._selected = (self._selected + 1) % len(self._options)
+                    self._opt_select = (self._opt_select + 1) % len(self._options)
                 case "KEY_UP":
-                    self._selected = (self._selected - 1) % len(self._options)
+                    self._opt_select = (self._opt_select - 1) % len(self._options)
         else:
             if val.name == "KEY_ENTER":
                 self._choosing = True
-                self._previous_choice = self._selected
+                self._previous_choice = self._opt_select
             else:
                 ret = super().handle_inputs(val, terminal)
         self._switch_to(ret)
