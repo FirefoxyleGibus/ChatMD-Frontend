@@ -1,22 +1,25 @@
 """
     Application class file (see App)
 """
+import os
 import asyncio
 import logging
 from blessed import Terminal
 from dotenv import load_dotenv
 
-
 from .bridge import Connection
-
-# setup logging
-logging.basicConfig(level=logging.DEBUG, filename="debug_log.txt", filemode="w")
 
 class App:
     """ Main app class """
 
     def __init__(self):
         load_dotenv()
+
+        # setup logging
+        if not os.getenv('LOG_TO_CONSOLE'):
+            logging.basicConfig(level=logging.NOTSET, filename="log.txt", filemode="w")
+        else:
+            logging.basicConfig(level=logging.NOTSET)
 
         self.current_menu = ""
         self._menus = {}

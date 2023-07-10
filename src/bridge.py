@@ -67,7 +67,6 @@ class Connection():
     async def receive_messages(self):
         """ Recieve messages """
         async for received_data in self.socket:
-            logging.debug(received_data)
             data = json.loads(received_data)
 
             # ON JOIN
