@@ -7,6 +7,7 @@ from blessed.keyboard import Keystroke
 from .base_element import BaseElement
 from .element_style import ElementStyle
 from src.app import App
+from src.termutil import print_at
 
 class BaseSelectable(BaseElement):
     """ Base Ui selectable element """
@@ -87,6 +88,34 @@ class BaseSelectable(BaseElement):
         if self._clear_terminal:
             App.get_instance().clear()
         target.select()
+    
+    def _draw_selection_effect(self, terminal: Terminal, pos_x: int, pos_y: int):
+        """ Draw the selection effect (i.e: > Button <)"""
+        offset_x = self._style.anchor_pos(self._width)
+        # selection effect
+        if self._is_selected:
+            offset_x += self._width + self._SELECT_INDICATOR_MARGIN
+            anchor = self._style.get("anchor")
+            match anchor:
+                case 'left':
+                    print_at(terminal, \
+                        pos_x-self._SELECT_INDICATOR_MARGIN, pos_y,\
+                        terminal.blink(">") + terminal.normal\
+                    )
+                case 'center':
+                    print_at(terminal, \
+                        pos_x-offset_x, pos_y,\
+                        terminal.blink(">") + terminal.normal\
+                    )
+                    print_at(terminal, \
+                        pos_x+offset_x, pos_y,\
+                        terminal.blink("<") + terminal.normal\
+                    )
+                case 'right':
+                    print_at(terminal, \
+                        pos_x+offset_x, pos_y,\
+                        terminal.blink("<") + terminal.normal\
+                    )
 
     def _handle_selection_input(self, side):
         if self._connected_to(side):
