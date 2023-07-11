@@ -14,6 +14,7 @@ class Connection():
     def __init__(self, app):
         self.app = app
         self.status = "Offline"
+        self._is_logged_in = False
         self.socket = None
 
         self.extra_headers = {}
@@ -51,8 +52,10 @@ class Connection():
                 await self.receive_messages()
             except ConnectionClosed:
                 self.status = "Offline"
+                logging.info("Connection Closed")
                 break
             except asyncio.exceptions.CancelledError:
+                logging.info("Trying to close this thread")
                 break
 
     def connect(self, url, token):
@@ -67,7 +70,7 @@ class Connection():
         return self
 
     async def receive_messages(self):
-        """ Recieve messages """
+        """ Receive messages """
         async for received_data in self.socket:
             data = json.loads(received_data)
 
@@ -101,8 +104,14 @@ class Connection():
                 self.app.get_menu("chat").set_latency(data["latency_ms"])
 
     def logout(self):
+        """ Log out from server """
         logging.info("Logging out")
-        requests.post(Connection.LOGOUT_ENDPOINT, data=self.extra_headers)
+        if self._is_logged_in:
+            res = self._http_request("delete", Connection.LOGOUT_ENDPOINT)
+            if res.status_code == 200:
+                self._is_logged_in = False
+            return res
+        return None
 
     async def close(self):
         """ Close the connection """
@@ -115,3 +124,32 @@ class Connection():
         if self.socket:
             await self.socket.close()
         
+    def _http_request(self, method, url, data={}, needs_auth=True):
+        token = self.app.token
+        headers = {}
+        if needs_auth:
+            headers = {"Authorization": f"Bearer {token}"}
+        logging.debug("REQUEST:[%s] AT %s WITH %s [Headers:%s]", method, url, data, headers)
+        match method:
+            case "post"|"POST":
+                return requests.post(url, data=data, headers=headers, timeout=5.0)
+            case "get"|"GET": 
+                return requests.get(url, data=data, headers=headers, timeout=5.0)
+            case "put"|"PUT":
+                return requests.put(url, data=data, headers=headers, timeout=5.0)
+            case "delete"|"DELETE":
+                return requests.delete(url, data=data, headers=headers, timeout=5.0)
+            case _:
+                return None
+        return None
+
+    def request_login(self, username, password):
+        res = self._http_request("post", Connection.LOGIN_ENDPOINT, 
+            data = {"username":username, "password":password}, needs_auth=False)
+        if res.status_code == 200:
+            self._is_logged_in = True
+        return res
+        
+    def request_update_username(self, new_username):
+        return self._http_request("put", Connection.USERNAME_ENDPOINT,
+                data = {"username": new_username})

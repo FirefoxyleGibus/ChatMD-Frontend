@@ -34,6 +34,8 @@ class App:
         self._run_task = None
         self.websocket = Connection(self)
 
+        self.token = ''
+
         App.instance = self
 
     def register_menu(self, menu):
@@ -83,8 +85,10 @@ class App:
                     await asyncio.sleep(.01)
                     self.draw()
                     self.handle_input()
+        except asyncio.exceptions.CancelledError:
+            return    
         except KeyboardInterrupt:
-            pass
+            return
 
 
     def draw(self):

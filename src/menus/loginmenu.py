@@ -76,8 +76,9 @@ class LoginMenu(BaseMenu):
         """ Log in with a username and a password """
         if username.rstrip() != "" and password.rstrip() != "":
             try:
-                response = requests.post(Connection.LOGIN_ENDPOINT,
-                    data = {"username":username, "password":password}, timeout=5.0)
+                response = App.get_instance().websocket.request_login(
+                    username, password
+                )
                 full_response = json.loads(response.text)
                 match full_response["code"]:
                     case 200:
