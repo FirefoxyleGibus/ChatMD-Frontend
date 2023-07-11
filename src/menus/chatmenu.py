@@ -10,13 +10,8 @@ from .ui_elements import TextBox, ElementStyle, DropDown
 from .ui_elements.base_selectable import BaseSelectable
 from src.app import App
 from src.bridge import Connection
-from src.termutil import print_at, color_text
+from src.termutil import print_at
 
-# ---------------------------
-# TO DO : Handle reception
-#       Either a "show message" func or smth else, i'll try to work with it dw
-# Tell me how it works
-# ---------------------------
 # Also now you can type send_message(message, self.websocket) when you want to send a message
 # and close_connection(self.websocket) to close the connection
 # /!\ DON'T FORGET TO CLOSE THE CONNECTION /!\
@@ -24,7 +19,7 @@ from src.termutil import print_at, color_text
 
 class ChatMenu(BaseMenu):
     """ Chat menu """
-    name = "#Guigui"
+    name = "NoName"
     color = 0x17ff67
     channel = "general"
     messages = []
@@ -54,6 +49,8 @@ class ChatMenu(BaseMenu):
 
     def start(self):
         self.focus_selectable(self._textbox)
+
+    def clear_messages(self):
         self.messages = []
 
     def set_latency(self, latency):
@@ -78,7 +75,7 @@ class ChatMenu(BaseMenu):
                 case 'message':
                     usrw = len(f"{nowmsg[1]}: ")
                     maxw = terminal.width - usrw
-                    coltxt = color_text(terminal, nowmsg[2])
+                    coltxt = ElementStyle.color_text(terminal, nowmsg[2])
                     line_amount = round(
                         (len(terminal.strip_seqs(coltxt)) / maxw)+0.5)
                     col = terminal.normal if nowmsg[3] != - \
@@ -114,12 +111,8 @@ class ChatMenu(BaseMenu):
                 # adios
                 app.quit()
             case "profile":
-                # Yeee baby
-                logging.debug("profile username")
                 app.get_menu("profile").set_username(self.name)
-                logging.debug("profile lang")
                 app.get_menu("profile").set_lang(app.user_settings.get("locale"))
-                logging.debug("Showing profile?")
                 app.show_menu("profile")
                 return self._textbox
             case "view_connected":
@@ -132,13 +125,13 @@ class ChatMenu(BaseMenu):
                 return self._users_list_menu
             case "disconnect":
                 # smaller adios (with abandonment issues ig plz fix it)
-                # FIX: fix killing connection
                 if self.connection:
                     _ = asyncio.create_task(self.connection.close())
                 # remove auto connect
                 app.user_settings.set("auto_connect", False)
                 app.user_settings.set("session_token", '')
                 app.show_menu("login")
+                self.clear_messages()
                 # close menu
                 return self._textbox
             case _:
