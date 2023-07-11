@@ -4,6 +4,7 @@
 from blessed import Terminal
 from blessed.keyboard import Keystroke
 
+from .callback import Callback
 from .base_selectable import BaseSelectable
 from .element_style import ElementStyle
 from src.termutil import print_at
@@ -28,6 +29,8 @@ class TextBox(BaseSelectable):
         self._placeholder = placeholder
         self._prefix = prefix
 
+        self._callback = Callback()
+
     def handle_inputs(self, val: Keystroke, terminal: Terminal):
         ret = super().handle_inputs(val, terminal)
         match val.name:
@@ -46,8 +49,19 @@ class TextBox(BaseSelectable):
                 else:
                     self._text = self._text[:self._curpos] + str(val) + self._text[self._curpos:]
                     self._curpos += 1
+            case "KEY_DOWN" | "KEY_UP" | "KEY_ENTER": # end typing so value must be updated
+                self._on_change()
+
         self._curpos = max(min(self._curpos, len(self._text)), 0)
         return ret
+
+    def set_on_change(self, callback, *args, **kwargs):
+        """ Set on change callback """
+        self._callback.set_func(callback, *args, **kwargs)
+        return self
+
+    def _on_change(self):
+        self._callback.call(self._text)
 
     def resize(self, width: int) -> None:
         """ Resize the element """

@@ -5,12 +5,16 @@
 import logging
 from blessed import Terminal
 
+from .callback import Callback
 from .element_style import ElementStyle
 from .base_selectable import BaseSelectable
 from src.termutil import print_at
 
 class DropDown(BaseSelectable):
     """ Drop down """
+
+    _SELECT_INDICATOR_MARGIN = 2
+
     def __init__(self, width, options:list[tuple[str,any]]=[], \
                  button_text='', selected=0, style=None, attachments=None):
         super().__init__(width, style=ElementStyle.create_with_defaults({
@@ -22,22 +26,22 @@ class DropDown(BaseSelectable):
         self._choosing = False
         self._button_text = button_text
 
-        self._callback = lambda *args: self
-        self._callback_args = []
-        self._callback_kwargs = {}
+        self._callback = Callback(default=lambda *args,**kwargs: self)
 
         if self._width < 10:
             logging.warn("Dropdown elements can't have width < 10")
             self._width = min(10, self._width)
 
-    def set_on_change(self, callback: callable, *callback_args, **callback_kwargs):
+    def set_on_change(self, callback: callable, *args, **kwargs):
         """ Set on change callback 
             :callback: the callback function, it must accept as first argument the option's name
+            and MUST return the element to focus next (can be self) 
         """
-        self._callback = callback.__call__
-        self._callback_args = callback_args
-        self._callback_kwargs = callback_kwargs
+        self._callback.set_func(callback, *args, **kwargs)
         return self
+
+    def _on_change(self, new_value):
+        return self._callback.call(new_value)
 
     def set_choosing(self, value:bool, starting_option=None):
         """ Set choosing state of this dropdown """
@@ -91,6 +95,9 @@ class DropDown(BaseSelectable):
             # Bottom box
             bottom_txt = terminal.normal + '└' + "─"*(self._width-2) + '┘'
             print_at(terminal, pos_x+offset_x, pos_y+len(self._options)+off_y, bottom_txt)
+        else:
+            self._draw_selection_effect(terminal, pos_x, pos_y)
+
 
     @property
     def value(self):
@@ -104,14 +111,16 @@ class DropDown(BaseSelectable):
         ret = self
         if self._choosing:
             match val.name:
-                case "KEY_ENTER" | "KEY_ESCAPE":
+                case "KEY_ENTER":
                     self._choosing = False
-                    # update user
-                    if val.name == "KEY_ESCAPE":
-                        self._opt_select = self._previous_choice
                     new_value = self._options[self._opt_select][1] 
+                    self._previous_choice = self._opt_select
                     print(terminal.clear)
-                    ret = self._callback(new_value, *self._callback_args, **self._callback_kwargs)
+                    ret = self._on_change(new_value)
+                case "KEY_ESCAPE":
+                    self._choosing = False
+                    self._opt_select = self._previous_choice
+                    print(terminal.clear)
                 case "KEY_DOWN":
                     self._opt_select = (self._opt_select + 1) % len(self._options)
                 case "KEY_UP":
