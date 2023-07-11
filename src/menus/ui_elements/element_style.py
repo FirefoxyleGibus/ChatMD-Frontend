@@ -12,17 +12,17 @@ def prng (beat = 0.0, seed = 0):
 class ElementStyle():
     """ UI Element style """
 
-    _defined_style_propreties = {
+    _defined_style_properties = {
         "align": 'left',
         "anchor": 'left',
         "color": '',
         "background": False
     }
-    """ Defined style propreties and their default values """
+    """ Defined style properties and their default values """
 
     def __init__(self, style: dict):
         self._style = {}
-        for key,val in self._defined_style_propreties.items():
+        for key,val in self._defined_style_properties.items():
             self._style[key] = style.get(key, val)
 
     def align(self, terminal: Terminal, text: str, width: int) -> tuple[str, int]:
@@ -47,16 +47,16 @@ class ElementStyle():
                 return  -width//2
         return 0
 
-    def get(self, style_proprety):
-        """ Get the value of a style proprety """
-        if style_proprety in self._defined_style_propreties:
-            return self._style[style_proprety]
+    def get(self, style_property):
+        """ Get the value of a style property """
+        if style_property in self._defined_style_properties:
+            return self._style[style_property]
         return None
 
-    def set(self, style_proprety, new_value):
-        """ Set the value of a style proprety """
-        if style_proprety in self._defined_style_propreties:
-            self._style[style_proprety] = new_value
+    def set(self, style_property, new_value):
+        """ Set the value of a style property """
+        if style_property in self._defined_style_properties:
+            self._style[style_property] = new_value
 
     def background(self, terminal):
         """ Return background code """
@@ -66,7 +66,7 @@ class ElementStyle():
     def color_text(terminal, text, beat = 0.0):
         """ Color fancy display text 
             Here, replace something like {cf XXXXXX} with the corresponding terminal color
-            Combinaisons supported: 
+            Combinations supported: 
             - cf RRGGBB        Foreground color
             - cb RRGGBB        Background color
             - b                Bold text
@@ -77,7 +77,7 @@ class ElementStyle():
             - k                Glitchifies text
         """
         text = text.replace(r"\\{", "￼ø").replace(r"\\}", "ŧ￼").replace("{", "�{").replace("}", "}�")
-        # If you are using � or "￼" genuiunely, what the #### is wrong with you /gen
+        # If you are using � or "￼" genuinely, what the #### is wrong with you /gen
         data = text.split("�")
         rendered_text = ""
         glitchify_next = False
