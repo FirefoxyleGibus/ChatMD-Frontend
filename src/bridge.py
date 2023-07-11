@@ -3,6 +3,7 @@
 """
 import os
 import json
+import requests
 import asyncio
 import logging
 from websockets import connect, ConnectionClosed
@@ -21,10 +22,11 @@ class Connection():
         self._run_task = None
 
         Connection.LOGIN_ENDPOINT = f"{os.getenv('API_HTTP_ADDRESS')}/auth/login"
+        Connection.LOGOUT_ENDPOINT = f"{os.getenv('API_HTTP_ADDRESS')}/auth/logout"
         Connection.REGISTER_ENDPOINT = f"{os.getenv('API_HTTP_ADDRESS')}/auth/register"
         Connection.WS_ENDPOINT = f"{os.getenv('API_WS_ADDRESS')}"
 
-        Connection.USERNAME_ENDPOINT = f"{os.getenv('API_HTTP_ADDRESS')}/username"
+        Connection.USERNAME_ENDPOINT = f"{os.getenv('API_HTTP_ADDRESS')}/account/update/username"
 
     def send_message(self, message):
         """ Send a message to the server """
@@ -98,8 +100,13 @@ class Connection():
             case "latency":
                 self.app.get_menu("chat").set_latency(data["latency_ms"])
 
+    def logout(self):
+        logging.info("Logging out")
+        requests.post(Connection.LOGOUT_ENDPOINT, data=self.extra_headers)
+
     async def close(self):
         """ Close the connection """
+        self.logout()
         logging.debug("Closing bridge")
         if self._run_task:
             self._run_task.cancel()
