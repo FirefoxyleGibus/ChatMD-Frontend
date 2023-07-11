@@ -10,8 +10,9 @@
 - [x] Token local storage (Auto-connect)
 - [x] Disconnect button (when using auto connect)
 - [x] Online users menu (require testing plz)
-- [ ] User customization/settings menu
-    - [ ] Username update
+- [x] User customization/settings menu
+    - [x] Username update
     - [x] Drop down menu (locale selection)
     - [ ] Color selector ?
+- [ ] Killing app main thread correctly
 - [ ] Interface Animation

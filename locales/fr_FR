@@ -27,3 +27,6 @@ connection_fail=Erreur lors de la connexion
 missing_credentials=Il manque le nom d'utilisateur ou le mot de passe
 timeout=La connexion a depassé le temps d'attente
 existing_user=L'utilisateur existe déjà
+
+profile_saved=Modifications Sauvegardées
+profile_failed_save=Erreur lors de la sauvegarde

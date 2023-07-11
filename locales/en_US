@@ -27,3 +27,6 @@ connection_fail=Failed to connect
 missing_credentials=Missing username or password
 timeout=Connection Timeout
 existing_user=User already exist
+
+profile_saved=Modfications Saved
+profile_failed_save=Failed to save modifications
