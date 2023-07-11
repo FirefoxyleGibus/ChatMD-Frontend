@@ -4,10 +4,10 @@
 from blessed import Terminal
 from blessed.keyboard import Keystroke
 
+from src.termutil import print_at
 from .callback import Callback
 from .base_selectable import BaseSelectable
 from .element_style import ElementStyle
-from src.termutil import print_at
 
 class TextBox(BaseSelectable):
     """ Textbox """

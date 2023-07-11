@@ -50,7 +50,7 @@ class App:
             self._menus[self.current_menu].start()
             return True
         return False
-    
+
     def clear(self):
         """ Request clearing the terminal """
         self._is_dirty = True
@@ -86,7 +86,7 @@ class App:
                     self.draw()
                     self.handle_input()
         except asyncio.exceptions.CancelledError:
-            return    
+            return
         except KeyboardInterrupt:
             return
 
@@ -108,8 +108,7 @@ class App:
         """ Quit the application """
         self._is_running = False
         _ = asyncio.create_task(self._quit_task())
-        
-    
+
     async def _quit_task(self):
         try:
             if self.websocket:

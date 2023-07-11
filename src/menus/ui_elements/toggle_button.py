@@ -6,14 +6,15 @@ from src.menus.ui_elements import Button, ElementStyle
 from src.termutil import print_at
 
 class ToggleButton(Button):
+    """ Toggle button class """
     _ACTIVE     = '[x]'
     _NOT_ACTIVE = '[ ]'
 
     _MARGIN = 2
 
     def __init__(self, forced_width=None, active=False, label="", attach: dict=None, style:ElementStyle=None):
-        super().__init__("", 
-            attach=attach, 
+        super().__init__("",
+            attach=attach,
             width=forced_width if forced_width else len(label) + self._MARGIN * 2 + len(self._ACTIVE),
             style=style
         )
@@ -30,7 +31,7 @@ class ToggleButton(Button):
                 self._width += len(self._label) + 2 * self._MARGIN
         else:
             self._label = self._label[:min(self._forced_width-(self._MARGIN * 2 + len(self._ACTIVE)),0)]
-        
+
     def _toggle(self):
         self._active = not self._active
 
@@ -48,7 +49,6 @@ class ToggleButton(Button):
         offset_x = self._style.anchor_pos(self._width)
 
         print_at(terminal, pos_x+offset_x, pos_y, aligned)
-
 
     def active(self):
         """ Return true if active (toggled on) """

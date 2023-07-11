@@ -4,10 +4,9 @@
 from blessed import Terminal
 from blessed.keyboard import Keystroke
 
-from .base_element import BaseElement
-from .element_style import ElementStyle
 from src.app import App
 from src.termutil import print_at
+from .base_element import BaseElement
 
 class BaseSelectable(BaseElement):
     """ Base Ui selectable element """
@@ -56,7 +55,7 @@ class BaseSelectable(BaseElement):
         """ Return if this side is connected """
         return side in self.SIDES and self.SIDES[side] in self._attachments
 
-    def handle_inputs(self, val: Keystroke, terminal: Terminal):
+    def handle_inputs(self, val: Keystroke, _terminal: Terminal):
         """ 
         Handle inputs and return the
         new selected object
@@ -76,19 +75,20 @@ class BaseSelectable(BaseElement):
             case "KEY_RIGHT":
                 ret = self._handle_selection_input('right')
             case "KEY_TAB":
-                ret = self._handle_selection_input('next') 
+                ret = self._handle_selection_input('next')
             case "KEY_BTAB":
-                ret = self._handle_selection_input('prev') 
+                ret = self._handle_selection_input('prev')
         return ret
-    
+
     def _switch_to(self, target):
         """ Switch to other thing """
-        if target == self: return
+        if target == self:
+            return
         self.deselect()
         if self._clear_terminal:
             App.get_instance().clear()
         target.select()
-    
+
     def _draw_selection_effect(self, terminal: Terminal, pos_x: int, pos_y: int):
         """ Draw the selection effect (i.e: > Button <)"""
         offset_x = self._style.anchor_pos(self._width)

@@ -5,22 +5,22 @@
 import logging
 from blessed import Terminal
 
+from src.termutil import print_at
 from .callback import Callback
 from .element_style import ElementStyle
 from .base_selectable import BaseSelectable
-from src.termutil import print_at
 
 class DropDown(BaseSelectable):
     """ Drop down """
 
     _SELECT_INDICATOR_MARGIN = 2
 
-    def __init__(self, width, options:list[tuple[str,any]]=[], \
+    def __init__(self, width, options:list[tuple[str,any]]=None, \
                  button_text='', selected=0, style=None, attachments=None):
         super().__init__(width, style=ElementStyle.create_with_defaults({
             'align': 'center', 'anchor': 'center', 'background': False
         }, style), attachments=attachments)
-        self._options  = options
+        self._options  = options if options else []
         self._opt_select = selected
         self._previous_choice = selected
         self._choosing = False
@@ -29,7 +29,7 @@ class DropDown(BaseSelectable):
         self._callback = Callback(default=lambda *args,**kwargs: self)
 
         if self._width < 10:
-            logging.warn("Dropdown elements can't have width < 10")
+            logging.exception("Dropdown elements can't have width < 10")
             self._width = min(10, self._width)
 
     def set_on_change(self, callback: callable, *args, **kwargs):
@@ -46,7 +46,7 @@ class DropDown(BaseSelectable):
     def set_choosing(self, value:bool, starting_option=None):
         """ Set choosing state of this dropdown """
         self._choosing = value
-        if not (starting_option is None):
+        if not starting_option is None:
             self._opt_select = min(len(self._options)-1, max(0, starting_option))
 
 
@@ -58,10 +58,14 @@ class DropDown(BaseSelectable):
 
     @property
     def options(self):
+        """ Options in the dropdown
+            :rtype: list[tuple(value_text, value)]
+        """
         return self._options
 
     @property
     def render_height(self):
+        """ Get final output render height """
         return len(self._options) + 2
 
     def draw(self, terminal: Terminal, pos_x, pos_y):
@@ -101,10 +105,12 @@ class DropDown(BaseSelectable):
 
     @property
     def value(self):
+        """ Actual chosen value """
         return self.options[self._opt_select][1]
 
     @property
     def value_text(self):
+        """ Actual chosen value displayed """
         return self.options[self._opt_select][0]
 
     def handle_inputs(self, val, terminal):
@@ -113,7 +119,7 @@ class DropDown(BaseSelectable):
             match val.name:
                 case "KEY_ENTER":
                     self._choosing = False
-                    new_value = self._options[self._opt_select][1] 
+                    new_value = self._options[self._opt_select][1]
                     self._previous_choice = self._opt_select
                     print(terminal.clear)
                     ret = self._on_change(new_value)

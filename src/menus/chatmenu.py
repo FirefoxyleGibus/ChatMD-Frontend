@@ -2,15 +2,13 @@
     ChatMenu class file
 """
 import asyncio
-import logging
 from notifypy import Notify
 
-from .basemenu import BaseMenu
-from .ui_elements import TextBox, ElementStyle, DropDown
-from .ui_elements.base_selectable import BaseSelectable
 from src.app import App
 from src.bridge import Connection
 from src.termutil import print_at
+from .basemenu import BaseMenu
+from .ui_elements import TextBox, ElementStyle, DropDown
 
 # Also now you can type send_message(message, self.websocket) when you want to send a message
 # and close_connection(self.websocket) to close the connection
@@ -41,7 +39,7 @@ class ChatMenu(BaseMenu):
             (lang.get("quit"),           "quit"),
         ], style={'anchor': 'left'}).set_on_change(self._execute_esc_button)
 
-        self._users_list_menu = DropDown(40, button_text=lang.get("online_users"), 
+        self._users_list_menu = DropDown(40, button_text=lang.get("online_users"),
             options=[('', '')], style={'anchor': 'left'}
         ).set_on_change(self._close_users_list)
 
@@ -51,6 +49,7 @@ class ChatMenu(BaseMenu):
         self.focus_selectable(self._textbox)
 
     def clear_messages(self):
+        """ Clear all messsages """
         self.messages = []
 
     def set_latency(self, latency):
@@ -162,7 +161,7 @@ class ChatMenu(BaseMenu):
             self._esc_menu.draw(terminal, 0, 0)
             self._users_list_menu.draw(terminal, self._esc_menu.width + 2, 0)
             self._draw_messages(terminal,
-                max_message_draw_pos=max(self._esc_menu.render_height, 
+                max_message_draw_pos=max(self._esc_menu.render_height,
                                          self._users_list_menu.render_height), start_pos=4)
         else:
             self._draw_messages(terminal, start_pos=4)

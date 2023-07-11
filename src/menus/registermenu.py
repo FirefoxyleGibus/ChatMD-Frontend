@@ -7,12 +7,12 @@ import json
 import logging
 import requests
 
-from .basemenu import BaseMenu
-from .ui_elements import TextBox, TextBoxPassword, Button, ElementStyle
-from src.termutil import print_at
 from src.app import App
-from .loginexception import LoginException
 from src.bridge import Connection
+from src.termutil import print_at
+from .basemenu import BaseMenu
+from .ui_elements import TextBox, TextBoxPassword, Button
+from .loginexception import LoginException
 
 class RegisterMenu(BaseMenu):
     """ Register menu """
@@ -42,7 +42,7 @@ class RegisterMenu(BaseMenu):
         ).set_on_click(App.get_instance().show_menu, 'login')
         self._connect_button.connect_side('left', self._login_button)
         self._quit_button.connect_side('left', self._login_button)
-    
+
     def start(self):
         self.focus_selectable(self._username)
 

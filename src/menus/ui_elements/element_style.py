@@ -140,7 +140,8 @@ class ElementStyle():
         """ Create the element style using a default dict and a value dict
             replacing defaults with values in value dict.
         """
-        if new_value is None: return ElementStyle(defaults)
+        if new_value is None:
+            return ElementStyle(defaults)
 
         value = defaults
         for name,val in new_value.items():

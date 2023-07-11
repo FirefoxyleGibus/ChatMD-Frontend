@@ -2,7 +2,6 @@
     TextBoxPassword class file
 """
 from .textbox import TextBox
-from .element_style import ElementStyle
 from .button import Button
 
 class TextBoxPassword(TextBox):

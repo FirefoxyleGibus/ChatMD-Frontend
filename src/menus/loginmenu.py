@@ -7,12 +7,11 @@ import json
 import logging
 import requests
 
-from .basemenu import BaseMenu
-from .ui_elements import TextBox, TextBoxPassword, Button, ElementStyle, ToggleButton
-from src.termutil import print_at
 from src.app import App
+from src.termutil import print_at
+from .basemenu import BaseMenu
+from .ui_elements import TextBox, TextBoxPassword, Button, ToggleButton
 from .loginexception import LoginException
-from src.bridge import Connection
 
 class LoginMenu(BaseMenu):
     """ Login menu """
@@ -59,12 +58,12 @@ class LoginMenu(BaseMenu):
 
         # Pre-load information of last-login
         user_settings = App.get_instance().user_settings
-        
+
         # last login info
         username = user_settings.get("saved_username", None)
         if username:
             self._username.set_text(username)
-        
+
         # Detect local token and keep signed in
         if user_settings.get("auto_connect", False):
             token = user_settings.get("session_token", None)
@@ -152,7 +151,7 @@ class LoginMenu(BaseMenu):
         except LoginException as err:
             self.status_message = lang.get(err.get_failure())
         self._password.set_text('') # clear text
-    
+
     def _token_login(self, username, token):
         app = App.get_instance()
         app.token = token

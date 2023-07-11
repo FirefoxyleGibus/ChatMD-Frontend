@@ -16,7 +16,7 @@ class BaseMenu():
         self._name = name
         self._selected = None
         logging.info("Menu <%s> was created", self._name)
-    
+
     def start(self):
         """ Called when shown """
         return

@@ -3,9 +3,9 @@
 """
 import os
 import json
-import requests
 import asyncio
 import logging
+import requests
 from websockets import connect, ConnectionClosed
 
 class Connection():
@@ -123,33 +123,41 @@ class Connection():
 
         if self.socket:
             await self.socket.close()
-        
-    def _http_request(self, method, url, data={}, needs_auth=True):
+
+    def _http_request(self, method, url, data=None, needs_auth=True):
         token = self.app.token
         headers = {}
+        request_data = data if data else {}
         if needs_auth:
             headers = {"Authorization": f"Bearer {token}"}
-        logging.debug("REQUEST:[%s] AT %s WITH %s [Headers:%s]", method, url, data, headers)
+        logging.debug("REQUEST:[%s] AT %s WITH %s [Headers:%s]", method, url, request_data, headers)
         match method:
             case "post"|"POST":
-                return requests.post(url, data=data, headers=headers, timeout=5.0)
-            case "get"|"GET": 
-                return requests.get(url, data=data, headers=headers, timeout=5.0)
+                return requests.post(url, data=request_data, headers=headers, timeout=5.0)
+            case "get"|"GET":
+                return requests.get(url, data=request_data, headers=headers, timeout=5.0)
             case "put"|"PUT":
-                return requests.put(url, data=data, headers=headers, timeout=5.0)
+                return requests.put(url, data=request_data, headers=headers, timeout=5.0)
             case "delete"|"DELETE":
-                return requests.delete(url, data=data, headers=headers, timeout=5.0)
+                return requests.delete(url, data=request_data, headers=headers, timeout=5.0)
             case _:
                 return None
         return None
 
     def request_login(self, username, password):
-        res = self._http_request("post", Connection.LOGIN_ENDPOINT, 
+        """ Request login HTTP Request
+            :username: string
+            :password: string
+        """
+        res = self._http_request("post", Connection.LOGIN_ENDPOINT,
             data = {"username":username, "password":password}, needs_auth=False)
         if res.status_code == 200:
             self._is_logged_in = True
         return res
-        
+
     def request_update_username(self, new_username):
+        """ Request update username HTTP Request
+            :new_username: string
+        """
         return self._http_request("put", Connection.USERNAME_ENDPOINT,
                 data = {"username": new_username})

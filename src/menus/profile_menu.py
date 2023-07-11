@@ -6,7 +6,6 @@ import logging
 import requests
 
 from src.app import App
-from src.bridge import Connection
 from src.termutil import print_at
 from .basemenu import BaseMenu
 from ..user_prefs import Locale
@@ -27,7 +26,7 @@ class ProfileMenu(BaseMenu):
         self._lang = DropDown(40, options=[
                 (lang, lang)
                 for lang in self._available_lang
-            ], 
+            ],
             attachments={'up': self._username, 'prev': self._username}
         )
 
@@ -53,10 +52,12 @@ class ProfileMenu(BaseMenu):
         self.focus_selectable(self._username)
 
     def set_lang(self, lang):
+        """ Set lang selected """
         logging.debug("locale: %s from %s", lang, self._lang.options)
         self._lang.set_choosing(False, self._available_lang.index(lang))
 
     def set_username(self, username):
+        """ Set actual username """
         self._username.set_text(username)
 
     def _save(self):
@@ -73,7 +74,6 @@ class ProfileMenu(BaseMenu):
         # save locale
         app.user_settings.set("locale", self._lang.value)
         return self
-        
 
     def _update_username_to_db(self):
         lang = App.get_locale()
@@ -95,7 +95,7 @@ class ProfileMenu(BaseMenu):
             return False
         except requests.exceptions.RequestException:
             self._save_status = "{cf FF0000}" + lang.get("connection_fail")
-            return False        
+            return False
 
     def _quit(self):
         App.get_instance().show_menu("chat")

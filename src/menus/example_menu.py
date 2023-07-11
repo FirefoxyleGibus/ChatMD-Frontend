@@ -42,7 +42,7 @@ class ExampleMenu(BaseMenu):
                 'align:':'center',
                 'anchor':'left',
                 'background': True
-            }), attach={ 'up': buttons['down'],}).set_on_change(lambda val: print(val))
+            }), attach={ 'up': buttons['down'],}).set_on_change(print)
         buttons['down'].connect_side('down', self._textbox)
         self._pass = TextBoxPassword(60, attach={'up': self._textbox})
         self._textbox.connect_side('down', self._pass)
@@ -57,7 +57,7 @@ class ExampleMenu(BaseMenu):
     def _log(self, message):
         """ Log something """
         logging.debug("DebugMenu says: %s", message)
-    
+
     def _set_choice(self, new_value):
         self._dropdown_value = new_value
         return self._dropdown
