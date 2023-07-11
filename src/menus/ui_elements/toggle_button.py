@@ -2,8 +2,9 @@
     Toggle button class file
 """
 
-from src.menus.ui_elements import Button, ElementStyle
 from src.termutil import print_at
+from .button import Button
+from .element_style import ElementStyle
 
 class ToggleButton(Button):
     """ Toggle button class """
@@ -40,7 +41,7 @@ class ToggleButton(Button):
 
         background = self._style.background(terminal)
         self._text = terminal.normal + self._label
-        if len(self._label) > 0: 
+        if len(self._label) > 0:
             self._text += ' '
         self._text += background + (self._ACTIVE if self._active else self._NOT_ACTIVE) + terminal.normal
 

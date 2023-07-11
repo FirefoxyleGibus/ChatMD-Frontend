@@ -31,4 +31,5 @@ class Locale:
 
     @staticmethod
     def get_available():
-        return [file for file in os.listdir('locales/')]
+        """ Get available locales """
+        return os.listdir('locales/')

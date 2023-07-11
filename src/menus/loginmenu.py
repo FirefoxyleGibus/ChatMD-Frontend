@@ -2,22 +2,21 @@
     LoginMenu class file
 """
 import datetime
-
 import json
 import logging
 import requests
 
-from src.app import App
-from src.termutil import print_at
+from ..app import App
+from ..termutil import print_at
+from ..exceptions.auth_exception import AuthException
 from .basemenu import BaseMenu
 from .ui_elements import TextBox, TextBoxPassword, Button, ToggleButton
-from .loginexception import LoginException
 
 class LoginMenu(BaseMenu):
     """ Login menu """
 
-    def __init__(self):
-        super().__init__("login")
+    def __init__(self, name="login"):
+        super().__init__(name)
         self.status_message = ""
 
         lang = App.get_instance().user_settings.get_locale()
@@ -71,35 +70,9 @@ class LoginMenu(BaseMenu):
                 self._token_login(username, token)
 
 
-    def login(self, username, password) -> str:
+    def connect_button(self, username, password) -> str:
         """ Log in with a username and a password """
-        if username.rstrip() != "" and password.rstrip() != "":
-            try:
-                response = App.get_instance().websocket.request_login(
-                    username, password
-                )
-                full_response = json.loads(response.text)
-                match full_response["code"]:
-                    case 200:
-                        return full_response["data"]["session"]
-                    case 404:
-                        raise LoginException("not_found")
-                    case 418: # unknown user
-                        raise LoginException("wrong_credentials")
-                    case 401:
-                        raise LoginException("wrong_credentials")
-                    case _:
-                        logging.error("Failed to connect: %d", full_response["code"])
-                        raise LoginException("connection_fail")
-            except json.JSONDecodeError:
-                raise LoginException("connection_fail")
-            except requests.exceptions.Timeout:
-                raise LoginException("timeout")
-            except requests.exceptions.TooManyRedirects:
-                raise LoginException("connection_fail")
-            except requests.exceptions.RequestException:
-                raise LoginException("connection_fail")
-        raise LoginException("missing_credentials")
+        return self._auth_request(App.get_instance().websocket.request_login, username, password)
 
     def draw(self, terminal) -> None:
         lang = App.get_instance().user_settings.get_locale()
@@ -135,7 +108,7 @@ class LoginMenu(BaseMenu):
         user_settings = App.get_instance().user_settings
         lang = user_settings.get_locale()
         try:
-            newtoken = self.login(self._username.text, self._password.text)
+            newtoken = self.connect_button(self._username.text, self._password.text)
             self.status_message = ""
 
             # save token for auto connect
@@ -148,7 +121,7 @@ class LoginMenu(BaseMenu):
                 user_settings.set("session_token", None)
 
             self._token_login(self._username.text, newtoken)
-        except LoginException as err:
+        except AuthException as err:
             self.status_message = lang.get(err.get_failure())
         self._password.set_text('') # clear text
 
@@ -163,3 +136,30 @@ class LoginMenu(BaseMenu):
         val = super().handle_input(terminal)
         if self._connect_button.is_selected and val.name == "KEY_ENTER":
             print(terminal.clear)
+
+    def _auth_request(self, request_func, username, password):
+        if username.rstrip() != "" and password.rstrip() != "":
+            try:
+                response = request_func(username, password)
+                full_response = json.loads(response.text)
+                match full_response["code"]:
+                    case 200:
+                        return full_response["data"]["session"]
+                    case 404:
+                        raise AuthException("not_found")
+                    case 418: # unknown user
+                        raise AuthException("wrong_credentials")
+                    case 401:
+                        raise AuthException("wrong_credentials")
+                    case _:
+                        logging.error("Failed to connect: %d", full_response["code"])
+                        raise AuthException("connection_fail")
+            except json.JSONDecodeError as exc:
+                raise AuthException("connection_fail") from exc
+            except requests.exceptions.Timeout as exc:
+                raise AuthException("timeout") from exc
+            except requests.exceptions.TooManyRedirects as exc:
+                raise AuthException("connection_fail") from exc
+            except requests.exceptions.RequestException as exc:
+                raise AuthException("connection_fail") from exc
+        raise AuthException("missing_credentials")

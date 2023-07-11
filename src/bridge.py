@@ -149,11 +149,16 @@ class Connection():
             :username: string
             :password: string
         """
-        res = self._http_request("post", Connection.LOGIN_ENDPOINT,
-            data = {"username":username, "password":password}, needs_auth=False)
-        if res.status_code == 200:
-            self._is_logged_in = True
-        return res
+        data = {'username': username, 'password': password}
+        return self._http_request("post", Connection.LOGIN_ENDPOINT, data, needs_auth=False)
+
+    def request_register(self, username, password):
+        """ Request register HTTP Request
+            :username: string
+            :password: string
+        """
+        data = {'username': username, 'password': password}
+        return self._http_request("post", Connection.REGISTER_ENDPOINT, data, needs_auth=False)
 
     def request_update_username(self, new_username):
         """ Request update username HTTP Request
