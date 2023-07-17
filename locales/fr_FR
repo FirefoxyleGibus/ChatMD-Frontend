@@ -5,13 +5,19 @@ goodbye=Au revoir, {user} !
 
 username=Nom d'utilisateur
 password=Mot de passe
+autoconnect=Connexion Auto
 date_status=Il est {time} ce {date}
+
+menu=Menu
+online_users=Utilisateurs actifs
 
 login=Se connecter
 register=S'enregister
 
 connect=Se Connecter
+disconnect=Se Deconnecter
 quit=Quitter
+save=Sauvegarder
 return_to_chat=Revenir à la conversation
 profile=Profil
 view_connected=Voir utilisateurs connectés
@@ -21,3 +27,6 @@ connection_fail=Erreur lors de la connexion
 missing_credentials=Il manque le nom d'utilisateur ou le mot de passe
 timeout=La connexion a depassé le temps d'attente
 existing_user=L'utilisateur existe déjà
+
+profile_saved=Modifications Sauvegardées
+profile_failed_save=Erreur lors de la sauvegarde

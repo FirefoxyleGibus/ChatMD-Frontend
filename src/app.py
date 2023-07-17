@@ -1,22 +1,25 @@
 """
     Application class file (see App)
 """
+import os
 import asyncio
 import logging
 from blessed import Terminal
 from dotenv import load_dotenv
 
-
-from src.bridge import Connection
-
-# setup logging
-logging.basicConfig(level=logging.DEBUG, filename="debug_log.txt", filemode="w")
+from .bridge import Connection
 
 class App:
     """ Main app class """
 
     def __init__(self):
         load_dotenv()
+
+        # setup logging
+        if not os.getenv('LOG_TO_CONSOLE'):
+            logging.basicConfig(level=logging.NOTSET, filename="log.txt", filemode="w")
+        else:
+            logging.basicConfig(level=logging.NOTSET)
 
         self.current_menu = ""
         self._menus = {}
@@ -28,7 +31,11 @@ class App:
         self._is_dirty = True
 
         self._loop = None
-        self.websocket = Connection(self)
+        self._run_tasks = []
+        self._task_lock = asyncio.Lock()
+        self.websocket = Connection(self, self._task_lock)
+
+        self.token = ''
 
         App.instance = self
 
@@ -45,17 +52,24 @@ class App:
             return True
         return False
 
+    def clear(self):
+        """ Request clearing the terminal """
+        self._is_dirty = True
+
     def get_menu(self, menu_name):
         """ Get the menu """
         return self._menus.get(menu_name)
-
 
     def run(self):
         """ Run """
         print("Application starting")
         self._loop = asyncio.get_event_loop()
+        self._loop.set_debug(True)
         try:
-            asyncio.ensure_future(self._draw_screen())
+            self._run_tasks = [
+                asyncio.ensure_future(self._draw_screen()),
+                asyncio.ensure_future(self.websocket.run())
+            ]
             self._loop.run_forever()
         except KeyboardInterrupt:
             pass
@@ -72,11 +86,13 @@ class App:
                 print(term.clear)
                 while self._is_running \
                     and not self.get_menu(self.current_menu).turnOff:
+                    logging.debug("App loop...")
                     await asyncio.sleep(.01)
-                    self.draw()
-                    self.handle_input()
-        except KeyboardInterrupt:
-            pass
+                    async with self._task_lock:
+                        self.draw()
+                        self.handle_input()
+        except asyncio.exceptions.CancelledError:
+            return
 
 
     def draw(self):
@@ -95,14 +111,19 @@ class App:
     def quit(self):
         """ Quit the application """
         self._is_running = False
-        try:
-            if self.websocket:
-                self.websocket.close()
-        except RuntimeError as err:
-            logging.error(err)
+        _ = asyncio.create_task(self._quit_task())
+
+    async def _quit_task(self):
+        for task in self._run_tasks:
+            task.cancel()
+        logging.info("Closed tasks")
+
+        await self.websocket.close()
+        logging.info("Closed websocket")
 
         if self._loop:
             self._loop.stop()
+        logging.info("Closed asyncio loop")
 
     @staticmethod
     def get_instance():

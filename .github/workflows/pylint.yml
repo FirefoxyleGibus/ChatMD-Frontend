@@ -21,4 +21,4 @@ jobs:
         pip install -r 'requirements.txt'
     - name: Analysing the code with pylint
       run: |
-        pylint $(git ls-files '*.py') --ignored-modules "websockets" --max-line-length 200 --max-attributes 10 --max-args 10 --notes "('FIXME')" --disable=raise-missing-from
+        pylint $(git ls-files '*.py') --ignored-modules "websockets" --max-line-length 200 --max-attributes 12 --max-args 12 --notes "('FIXME')" --disable=raise-missing-from

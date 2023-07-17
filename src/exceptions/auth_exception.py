@@ -1,9 +1,9 @@
 """
-    Login Exception
+    Authentification Exception
 """
 
-class LoginException(Exception):
-    """ Exception for login or register """
+class AuthException(Exception):
+    """ Exception for auth (login or register) """
     def __init__(self, failure):
         super().__init__()
         self._failure = failure

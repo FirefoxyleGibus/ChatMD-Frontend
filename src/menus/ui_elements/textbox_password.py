@@ -1,23 +1,21 @@
 """
     TextBoxPassword class file
 """
-from src.menus.ui_elements.textbox import TextBox
-from src.menus.ui_elements.element_style import ElementStyle
-from src.menus.ui_elements.button import Button
+from .textbox import TextBox
+from .button import Button
 
 class TextBoxPassword(TextBox):
     """ password Textbox """
 
     def __init__(self, width: int, prefix="", style=None, attach=None):
         super().__init__(width, "", prefix, style, attach)
-        # self._width -= 4 # space for toggle_button
         self._hidden_text = ""
         self._hidden = True
-        self._toggle_button = Button('[ ]', 3, style=ElementStyle({
+        self._toggle_button = Button('[ ]', 3, style={
                 'anchor': 'right', 
                 'align': 'center',
                 'background': True
-            }),
+            },
             attach={'up': self}).set_on_click(self._toggle_visibility)
         self._attachments[self.SIDES.get('down')] = self._toggle_button
 

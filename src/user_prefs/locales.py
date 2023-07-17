@@ -1,6 +1,7 @@
 """
     Locale class file
 """
+import os
 import locale
 
 class Locale:
@@ -27,3 +28,8 @@ class Locale:
     def get(self, word):
         """ Get the translated word in this locale or the original word """
         return self._words.get(word, str(word))
+
+    @staticmethod
+    def get_available():
+        """ Get available locales """
+        return os.listdir('locales/')

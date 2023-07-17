@@ -1,8 +1,12 @@
 """ 
     Base Menu class file
 """
+import logging
+from blessed import Terminal
+
 from src.termutil import print_at
-from src.menus.ui_elements.base_selectable import BaseSelectable
+from .ui_elements.base_selectable import BaseSelectable
+
 
 class BaseMenu():
     """ Base menu class """
@@ -11,7 +15,8 @@ class BaseMenu():
     def __init__(self, name):
         self._name = name
         self._selected = None
-    
+        logging.info("Menu <%s> was created", self._name)
+
     def start(self):
         """ Called when shown """
         return
@@ -28,11 +33,11 @@ class BaseMenu():
             self._selected = selectable
             self._selected.select()
 
-    def draw(self, terminal) -> None:
+    def draw(self, terminal: Terminal) -> None:
         """ Draw the menu """
         print_at(terminal, 0, 0, self._name)
 
-    def handle_input(self, terminal) -> any:
+    def handle_input(self, terminal: Terminal) -> any:
         """ Handle inputs """
         val = terminal.inkey(timeout=1/60, esc_delay=0)
         if self._selected:

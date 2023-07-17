@@ -5,42 +5,64 @@ import os
 import json
 import asyncio
 import logging
+import requests
 from websockets import connect, ConnectionClosed
 
 class Connection():
     """ Connection abstraction layer class """
 
-    def __init__(self, app):
+    def __init__(self, app, app_task_lock):
         self.app = app
+        self._app_task_lock = app_task_lock
         self.status = "Offline"
+        self._is_logged_in = False
         self.socket = None
 
         self.extra_headers = {}
         self.url = ""
 
+        self._connect_event = asyncio.Event()
+
         Connection.LOGIN_ENDPOINT = f"{os.getenv('API_HTTP_ADDRESS')}/auth/login"
+        Connection.LOGOUT_ENDPOINT = f"{os.getenv('API_HTTP_ADDRESS')}/auth/logout"
         Connection.REGISTER_ENDPOINT = f"{os.getenv('API_HTTP_ADDRESS')}/auth/register"
         Connection.WS_ENDPOINT = f"{os.getenv('API_WS_ADDRESS')}"
 
-        Connection.USERNAME_ENDPOINT = f"{os.getenv('API_HTTP_ADDRESS')}/username"
+        Connection.USERNAME_ENDPOINT = f"{os.getenv('API_HTTP_ADDRESS')}/account/update/username"
 
     def send_message(self, message):
         """ Send a message to the server """
         if self.socket:
-            task = asyncio.create_task(self.socket.send(message))
+            task = asyncio.create_task(self._send(message))
             logging.debug(task) # to prevent a "Task exception was never retrieved"
         else:
             logging.error("socket is not connected")
 
+    async def _send(self, message):
+        try:
+            await self.socket.send(message)
+        except ConnectionClosed as err:
+            logging.error(err)
+
     async def run(self):
         """ Main entry of the program """
+        logging.debug('Awaiting connection event')
+        await self._connect_event.wait()
         logging.debug("Connecting to WS : %s", self.url)
         async for self.socket in connect(self.url, extra_headers=self.extra_headers):
+            logging.debug("Socket loop...")
             try:
                 self.status = "Online"
                 await self.receive_messages()
             except ConnectionClosed:
                 self.status = "Offline"
+                logging.info("Connection Closed")
+                break
+            except asyncio.exceptions.CancelledError:
+                logging.info("Trying to close this thread")
+                await self.socket.close()
+                break
+        self._connect_event.clear()
 
     def connect(self, url, token):
         """ connect to a endpoint """
@@ -48,31 +70,32 @@ class Connection():
         self.url = url
         self.extra_headers = {"Authorization": f"Bearer {token}"}
         logging.debug("TOKEN : %s", token)
-        asyncio.ensure_future(self.run())
+        self._connect_event.set()
         logging.debug("Running bridge")
         return self
 
     async def receive_messages(self):
-        """ Recieve messages """
+        """ Receive messages """
         async for received_data in self.socket:
-            logging.debug(received_data)
+            logging.debug("Socket message loop...")
             data = json.loads(received_data)
 
             # ON JOIN
-            if "messages" in data: # last posted messages
-                for msg in data["messages"]:
-                    self._handle_new_message(msg, on_join_message=True)
-                self.app.get_menu("chat").messages.reverse()
+            async with self._app_task_lock: # concurrence lock
+                if "messages" in data: # last posted messages
+                    for msg in data["messages"]:
+                        self._handle_new_message(msg, on_join_message=True)
+                    self.app.get_menu("chat").messages.reverse()
 
-            if "online" in data:
-                for member in data["online"]:
-                    self.app.get_menu("chat").add_online(member["username"])
+                if "online" in data:
+                    for member in data["online"]:
+                        self.app.get_menu("chat").add_online(member["username"])
 
-            if "messages" in data or "online" in data:
-                continue
+                if "messages" in data or "online" in data:
+                    continue
 
-            # when message is just posted and we are connected
-            self._handle_new_message(data)
+                # when message is just posted and we are connected
+                self._handle_new_message(data)
 
     def _handle_new_message(self, message, on_join_message=False):
         msg_type = message["type"]
@@ -87,8 +110,64 @@ class Connection():
             case "latency":
                 self.app.get_menu("chat").set_latency(data["latency_ms"])
 
-    def close(self):
-        """ Close the connection """
+    async def logout(self):
+        """ Log out from server """
+        logging.info("Logging out")
         if self.socket:
-            self.socket.close()
-            self.socket = None
+            await self.socket.close()
+        if self._is_logged_in:
+            res = self._http_request("delete", Connection.LOGOUT_ENDPOINT)
+            if res.status_code == 200:
+                self._is_logged_in = False
+            return res
+        return None
+
+    async def close(self):
+        """ Close the connection """
+        await self.logout()
+        logging.debug("Closing bridge")
+        if self.socket:
+            await self.socket.close()
+
+    def _http_request(self, method, url, data=None, needs_auth=True):
+        token = self.app.token
+        headers = {}
+        request_data = data if data else {}
+        if needs_auth:
+            headers = {"Authorization": f"Bearer {token}"}
+        logging.debug("REQUEST:[%s] AT %s WITH %s [Headers:%s]", method, url, request_data, headers)
+        match method:
+            case "post"|"POST":
+                return requests.post(url, data=request_data, headers=headers, timeout=5.0)
+            case "get"|"GET":
+                return requests.get(url, data=request_data, headers=headers, timeout=5.0)
+            case "put"|"PUT":
+                return requests.put(url, data=request_data, headers=headers, timeout=5.0)
+            case "delete"|"DELETE":
+                return requests.delete(url, data=request_data, headers=headers, timeout=5.0)
+            case _:
+                return None
+        return None
+
+    def request_login(self, username, password):
+        """ Request login HTTP Request
+            :username: string
+            :password: string
+        """
+        data = {'username': username, 'password': password}
+        return self._http_request("post", Connection.LOGIN_ENDPOINT, data, needs_auth=False)
+
+    def request_register(self, username, password):
+        """ Request register HTTP Request
+            :username: string
+            :password: string
+        """
+        data = {'username': username, 'password': password}
+        return self._http_request("post", Connection.REGISTER_ENDPOINT, data, needs_auth=False)
+
+    def request_update_username(self, new_username):
+        """ Request update username HTTP Request
+            :new_username: string
+        """
+        return self._http_request("put", Connection.USERNAME_ENDPOINT,
+                data = {"username": new_username})

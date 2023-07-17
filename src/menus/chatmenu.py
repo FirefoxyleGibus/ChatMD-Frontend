@@ -1,20 +1,15 @@
 """
     ChatMenu class file
 """
+import asyncio
 from notifypy import Notify
 
-from src.menus.basemenu import BaseMenu
-from src.menus.ui_elements import TextBox, ElementStyle
-from src.menus.ui_elements.base_selectable import BaseSelectable
 from src.app import App
 from src.bridge import Connection
-from src.termutil import print_at, color_text
+from src.termutil import print_at
+from .basemenu import BaseMenu
+from .ui_elements import TextBox, ElementStyle, DropDown
 
-# ---------------------------
-# TO DO : Handle reception
-#       Either a "show message" func or smth else, i'll try to work with it dw
-# Tell me how it works
-# ---------------------------
 # Also now you can type send_message(message, self.websocket) when you want to send a message
 # and close_connection(self.websocket) to close the connection
 # /!\ DON'T FORGET TO CLOSE THE CONNECTION /!\
@@ -22,32 +17,40 @@ from src.termutil import print_at, color_text
 
 class ChatMenu(BaseMenu):
     """ Chat menu """
-    name = "#Guigui"
+    name = "NoName"
     color = 0x17ff67
     channel = "general"
     messages = []
     _online_members = set()
     connection = None
-    esc_menu = False
-    esc_pos = 0
-    esc_buttons = [
-        "return_to_chat",
-        "profile",
-        "view_connected",
-        "quit",
-    ]
 
     def __init__(self):
         super().__init__("chat")
-        self._textbox = TextBox(1, "", ">>> ", style=ElementStyle({
-                'anchor':'center', 'align':"left", 'background':False
-            }))
-        self._esc_focus = BaseSelectable()
+        self._textbox = TextBox(1, "", ">>> ", style={
+            'anchor':'center', 'align':"left", 'background':False
+        })
+
+        lang = App.get_locale()
+        self._esc_menu = DropDown(40, button_text=lang.get('menu'), options=[
+            (lang.get("return_to_chat"), "return_to_chat"),
+            (lang.get("profile"),        "profile"),
+            (lang.get("view_connected"), "view_connected"),
+            (lang.get("disconnect"),     "disconnect"),
+            (lang.get("quit"),           "quit"),
+        ], style={'anchor': 'left'}).set_on_change(self._execute_esc_button)
+
+        self._users_list_menu = DropDown(40, button_text=lang.get("online_users"),
+            options=[('', '')], style={'anchor': 'left'}
+        ).set_on_change(self._close_users_list)
 
         self._latency = 0
-    
+
     def start(self):
         self.focus_selectable(self._textbox)
+
+    def clear_messages(self):
+        """ Clear all messsages """
+        self.messages = []
 
     def set_latency(self, latency):
         """ Set the latency """
@@ -71,7 +74,7 @@ class ChatMenu(BaseMenu):
                 case 'message':
                     usrw = len(f"{nowmsg[1]}: ")
                     maxw = terminal.width - usrw
-                    coltxt = color_text(terminal, nowmsg[2])
+                    coltxt = ElementStyle.color_text(terminal, nowmsg[2])
                     line_amount = round(
                         (len(terminal.strip_seqs(coltxt)) / maxw)+0.5)
                     col = terminal.normal if nowmsg[3] != - \
@@ -100,78 +103,87 @@ class ChatMenu(BaseMenu):
                     msgdrawpos -= 1
             curmsg -= 1
 
-    def _execute_esc_button(self, button, terminal):
+    def _execute_esc_button(self, button):
+        app = App.get_instance()
         match button:
             case "quit":
-                App.get_instance().quit()
+                # adios
+                app.quit()
             case "profile":
-                pass
+                app.get_menu("profile").set_username(self.name)
+                app.get_menu("profile").set_lang(app.user_settings.get("locale"))
+                app.show_menu("profile")
+                return self._textbox
             case "view_connected":
-                pass
+                # update user list
+                self._users_list_menu.set_options([(username, username) \
+                                                   for username in self._online_members])
+                self._users_list_menu.set_choosing(True)
+                # force it to show menu bcoz its pretty
+                self._esc_menu.set_choosing(True)
+                return self._users_list_menu
+            case "disconnect":
+                # smaller adios (with abandonment issues ig plz fix it)
+                if self.connection:
+                    _ = asyncio.create_task(self.connection.close())
+                # remove auto connect
+                app.user_settings.set("auto_connect", False)
+                app.user_settings.set("session_token", '')
+                app.show_menu("login")
+                self.clear_messages()
+                # close menu
+                return self._textbox
             case _:
-                self.esc_menu = False
-                self.focus_selectable(self._textbox)
-                print(terminal.clear)
+                # get back to real stuff bby
+                return self._textbox
 
-    def _draw_esc_menu(self, terminal):
-        lang = App.get_locale()
-        for option, button in enumerate(self.esc_buttons):
-            prefix = terminal.blink(">") + " " + terminal.reverse if self.esc_pos == option \
-                else "  "
-            print_at(terminal, 1, option, prefix+lang.get(button) + " " *
-                     (terminal.width - len(lang.get(button)) - 5) + terminal.normal)
-        print_at(terminal, 0, len(self.esc_buttons), "─"*terminal.width)
+    def _close_users_list(self, _value):
+        self._esc_menu.set_choosing(True)
+        return self._esc_menu
 
     def draw(self, terminal) -> None:
         self._textbox.resize(terminal.width-1)
 
         print_at(terminal, 0, terminal.height-3, "─"*terminal.width)
         self._textbox.draw(terminal, terminal.width//2, terminal.height - 2)
-        if self.esc_menu:
-            # this will be used when i make a proper options dropdown
-            self._esc_focus.draw(terminal, 0, 0)
-            self._draw_esc_menu(terminal)
-            self._draw_messages(terminal, max_message_draw_pos=len(
-                self.esc_buttons), start_pos=4)
+
+        # connection status
+        latency = terminal.center(f"{self._latency}ms", 6)
+        topright = f"   {self.connection.status} | {latency} | {len(self._online_members)} online"
+        print_at(terminal, terminal.width-len(topright), 0, topright)
+
+        # Esc menu
+        if self._esc_menu.is_selected:
+            self._esc_menu.draw(terminal, 0, 0)
+            self._draw_messages(terminal,
+                                max_message_draw_pos=self._esc_menu.render_height, start_pos=4)
+        elif self._users_list_menu.is_selected:
+            self._esc_menu.draw(terminal, 0, 0)
+            self._users_list_menu.draw(terminal, self._esc_menu.width + 2, 0)
+            self._draw_messages(terminal,
+                max_message_draw_pos=max(self._esc_menu.render_height,
+                                         self._users_list_menu.render_height), start_pos=4)
         else:
             self._draw_messages(terminal, start_pos=4)
-            # connection status
-            latency = terminal.center(f"{self._latency}ms", 6)
-            topright = f"   {self.connection.status} | {latency} | {len(self._online_members)} online"
-            print_at(terminal, terminal.width-len(topright), 0, topright)
 
             print_at(terminal, 1, 0, f"#{self.channel}")
             print_at(terminal, 0, 1, "─"*terminal.width)
 
     def handle_input(self, terminal):
         val = super().handle_input(terminal)
-        if self.esc_menu:
-            if val.name == "KEY_ESCAPE":
-                self.esc_menu = False
-                self.focus_selectable(self._textbox)
+        if val.name == "KEY_ENTER":
+            if self._textbox.text.strip() != "":
+                self.messages.append(
+                    ('message', self.name, self._textbox.text, -1))
                 print(terminal.clear)
-            elif val.name in ("KEY_DOWN", "KEY_UP"):
-                self.esc_pos += {"KEY_DOWN": 1, "KEY_UP": -1}[val.name]
-                self.esc_pos %= len(self.esc_buttons)
-            elif val.name == "KEY_ENTER":
-                # TODO: THE BUTTONS
-                self._execute_esc_button(
-                    self.esc_buttons[self.esc_pos], terminal)
+                self.connection.send_message(self._textbox.text)
+                self._textbox.set_text("")
+        elif val.name == "KEY_ESCAPE" and self._textbox.is_selected:
+            self.focus_selectable(self._esc_menu)
+            self._esc_menu.set_choosing(True)
+            print(terminal.clear)
         else:
-            if val.name == "KEY_ENTER":
-                if self._textbox.text.strip() != "":
-                    self.messages.append(
-                        ('message', self.name, self._textbox.text, -1))
-                    print(terminal.clear)
-                    self.connection.send_message(self._textbox.text)
-                    self._textbox.set_text("")
-            elif val.name == "KEY_ESCAPE":
-                self.focus_selectable(self._esc_focus)
-                print(terminal.clear)
-                self.esc_menu = True
-                self.esc_pos = 0
-            else:
-                pass
+            pass
 
     def connect(self, token):
         """ Connect to the backend """

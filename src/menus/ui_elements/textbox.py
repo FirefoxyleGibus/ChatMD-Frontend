@@ -4,9 +4,10 @@
 from blessed import Terminal
 from blessed.keyboard import Keystroke
 
-from src.menus.ui_elements.base_selectable import BaseSelectable
-from src.menus.ui_elements.element_style import ElementStyle
 from src.termutil import print_at
+from .callback import Callback
+from .base_selectable import BaseSelectable
+from .element_style import ElementStyle
 
 class TextBox(BaseSelectable):
     """ Textbox """
@@ -14,18 +15,21 @@ class TextBox(BaseSelectable):
     SIDES = {
         'down':  0,
         'up':    1,
+
+        'next': 2,
+        'prev': 3,
     }
 
     def __init__(self, width: int, placeholder="", prefix="", style=None, attach: dict = None):
-        super().__init__(style=style if style else ElementStyle({
+        super().__init__(width, style=ElementStyle.create_with_defaults({
             'align': 'center', 'anchor': 'center', 'background': True
-        }
-        ), attachments=attach, clear_terminal_move=False)
+        }, style), attachments=attach, clear_terminal_move=False)
         self._text = ""
         self._curpos = 0
-        self._width = width
         self._placeholder = placeholder
         self._prefix = prefix
+
+        self._callback = Callback()
 
     def handle_inputs(self, val: Keystroke, terminal: Terminal):
         ret = super().handle_inputs(val, terminal)
@@ -45,8 +49,19 @@ class TextBox(BaseSelectable):
                 else:
                     self._text = self._text[:self._curpos] + str(val) + self._text[self._curpos:]
                     self._curpos += 1
+            case "KEY_DOWN" | "KEY_UP" | "KEY_ENTER": # end typing so value must be updated
+                self._on_change()
+
         self._curpos = max(min(self._curpos, len(self._text)), 0)
         return ret
+
+    def set_on_change(self, callback, *args, **kwargs):
+        """ Set on change callback """
+        self._callback.set_func(callback, *args, **kwargs)
+        return self
+
+    def _on_change(self):
+        self._callback.call(self._text)
 
     def resize(self, width: int) -> None:
         """ Resize the element """
@@ -60,6 +75,7 @@ class TextBox(BaseSelectable):
     def set_text(self, new_text: str) -> None:
         """ Set the content of this textbox """
         self._text = new_text
+        self._curpos = len(new_text) # place cursor at the end
 
     def _visible_text(self):
         return self._text
