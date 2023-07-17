@@ -11,8 +11,9 @@ from websockets import connect, ConnectionClosed
 class Connection():
     """ Connection abstraction layer class """
 
-    def __init__(self, app):
+    def __init__(self, app, app_task_lock):
         self.app = app
+        self._app_task_lock = app_task_lock
         self.status = "Offline"
         self._is_logged_in = False
         self.socket = None
@@ -20,7 +21,7 @@ class Connection():
         self.extra_headers = {}
         self.url = ""
 
-        self._run_task = None
+        self._connect_event = asyncio.Event()
 
         Connection.LOGIN_ENDPOINT = f"{os.getenv('API_HTTP_ADDRESS')}/auth/login"
         Connection.LOGOUT_ENDPOINT = f"{os.getenv('API_HTTP_ADDRESS')}/auth/logout"
@@ -45,8 +46,11 @@ class Connection():
 
     async def run(self):
         """ Main entry of the program """
+        logging.debug('Awaiting connection event')
+        await self._connect_event.wait()
         logging.debug("Connecting to WS : %s", self.url)
         async for self.socket in connect(self.url, extra_headers=self.extra_headers):
+            logging.debug("Socket loop...")
             try:
                 self.status = "Online"
                 await self.receive_messages()
@@ -56,7 +60,9 @@ class Connection():
                 break
             except asyncio.exceptions.CancelledError:
                 logging.info("Trying to close this thread")
+                await self.socket.close()
                 break
+        self._connect_event.clear()
 
     def connect(self, url, token):
         """ connect to a endpoint """
@@ -64,31 +70,32 @@ class Connection():
         self.url = url
         self.extra_headers = {"Authorization": f"Bearer {token}"}
         logging.debug("TOKEN : %s", token)
-        if self._run_task is None:
-            self._run_task = asyncio.ensure_future(self.run())
+        self._connect_event.set()
         logging.debug("Running bridge")
         return self
 
     async def receive_messages(self):
         """ Receive messages """
         async for received_data in self.socket:
+            logging.debug("Socket message loop...")
             data = json.loads(received_data)
 
             # ON JOIN
-            if "messages" in data: # last posted messages
-                for msg in data["messages"]:
-                    self._handle_new_message(msg, on_join_message=True)
-                self.app.get_menu("chat").messages.reverse()
+            async with self._app_task_lock: # concurrence lock
+                if "messages" in data: # last posted messages
+                    for msg in data["messages"]:
+                        self._handle_new_message(msg, on_join_message=True)
+                    self.app.get_menu("chat").messages.reverse()
 
-            if "online" in data:
-                for member in data["online"]:
-                    self.app.get_menu("chat").add_online(member["username"])
+                if "online" in data:
+                    for member in data["online"]:
+                        self.app.get_menu("chat").add_online(member["username"])
 
-            if "messages" in data or "online" in data:
-                continue
+                if "messages" in data or "online" in data:
+                    continue
 
-            # when message is just posted and we are connected
-            self._handle_new_message(data)
+                # when message is just posted and we are connected
+                self._handle_new_message(data)
 
     def _handle_new_message(self, message, on_join_message=False):
         msg_type = message["type"]
@@ -103,9 +110,11 @@ class Connection():
             case "latency":
                 self.app.get_menu("chat").set_latency(data["latency_ms"])
 
-    def logout(self):
+    async def logout(self):
         """ Log out from server """
         logging.info("Logging out")
+        if self.socket:
+            await self.socket.close()
         if self._is_logged_in:
             res = self._http_request("delete", Connection.LOGOUT_ENDPOINT)
             if res.status_code == 200:
@@ -115,12 +124,8 @@ class Connection():
 
     async def close(self):
         """ Close the connection """
-        self.logout()
+        await self.logout()
         logging.debug("Closing bridge")
-        if self._run_task:
-            self._run_task.cancel()
-            self._run_task = None
-
         if self.socket:
             await self.socket.close()
 

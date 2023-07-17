@@ -31,8 +31,9 @@ class App:
         self._is_dirty = True
 
         self._loop = None
-        self._run_task = None
-        self.websocket = Connection(self)
+        self._run_tasks = []
+        self._task_lock = asyncio.Lock()
+        self.websocket = Connection(self, self._task_lock)
 
         self.token = ''
 
@@ -59,13 +60,16 @@ class App:
         """ Get the menu """
         return self._menus.get(menu_name)
 
-
     def run(self):
         """ Run """
         print("Application starting")
         self._loop = asyncio.get_event_loop()
+        self._loop.set_debug(True)
         try:
-            self._run_task = asyncio.ensure_future(self._draw_screen())
+            self._run_tasks = [
+                asyncio.ensure_future(self._draw_screen()),
+                asyncio.ensure_future(self.websocket.run())
+            ]
             self._loop.run_forever()
         except KeyboardInterrupt:
             pass
@@ -82,12 +86,12 @@ class App:
                 print(term.clear)
                 while self._is_running \
                     and not self.get_menu(self.current_menu).turnOff:
+                    logging.debug("App loop...")
                     await asyncio.sleep(.01)
-                    self.draw()
-                    self.handle_input()
+                    async with self._task_lock:
+                        self.draw()
+                        self.handle_input()
         except asyncio.exceptions.CancelledError:
-            return
-        except KeyboardInterrupt:
             return
 
 
@@ -110,17 +114,16 @@ class App:
         _ = asyncio.create_task(self._quit_task())
 
     async def _quit_task(self):
-        try:
-            if self.websocket:
-                await self.websocket.close()
-        except RuntimeError as err:
-            logging.error(err)
+        for task in self._run_tasks:
+            task.cancel()
+        logging.info("Closed tasks")
 
-        if self._run_task:
-            self._run_task.cancel()
+        await self.websocket.close()
+        logging.info("Closed websocket")
 
         if self._loop:
             self._loop.stop()
+        logging.info("Closed asyncio loop")
 
     @staticmethod
     def get_instance():
