@@ -31,16 +31,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Doxygenize
-        uses: langroodi/doxygenize@v1.7.0
-        with:
-          # Generated HTML documents output folder
-          htmloutput: ./docs
-          # GitHub Pages branch name
-          # GitHub Pages directory path
-          ghpagesdir: ./
-          # Toggle dark mode CSS
-          darkmode: true
+      - name: Install Doxygen
+        run: |
+          sudo apt install doxygen 
+      - name: Generate docs
+        run: |
+          doxygen
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Upload artifact
