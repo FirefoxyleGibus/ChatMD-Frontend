@@ -159,3 +159,4 @@ cython_debug/
 user_settings.yml
 debug_*.txt
 log.txt
+docs/
