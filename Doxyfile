@@ -1,0 +1,48 @@
+# Project configuration 
+
+PROJECT_NAME         = "ChatMD"
+PROJECT_LOGO         = chatmd.ico
+PROJECT_BRIEF        = "A lightweight terminal chat application."
+
+# File process
+
+INPUT                = ./src index.py
+OUTPUT_DIRECTORY     = docs
+FILE_PATTERNS        = *.py
+EXTRACT_ALL          = YES
+RECURSIVE            = YES
+
+
+###
+BRIEF_MEMBER_DESC      = YES
+ABBREVIATE_BRIEF       = "The $name class" \
+                         "The $name widget" \
+                         "The $name file" \
+                         is \
+                         provides \
+                         specifies \
+                         contains \
+                         represents \
+                         a \
+                         an \
+                         the
+
+DOXYFILE_ENCODING    = UTF-8
+HIDE_SCOPE_NAMES     = YES
+GENERATE_LATEX       = NO
+GENERATE_MAN         = NO
+GENERATE_RTF         = NO
+OPTIMIZE_OUTPUT_JAVA = YES
+QUIET                = YES
+JAVADOC_AUTOBRIEF    = YES
+PYTHON_DOCSTRING     = YES
+# SEARCHENGINE         = NO
+
+# For the theme (sidebar only)
+
+GENERATE_TREEVIEW      = YES # required!
+DISABLE_INDEX          = NO
+FULL_SIDEBAR           = NO
+HTML_EXTRA_STYLESHEET  = doxygen-awesome-css/doxygen-awesome.css \
+                        doxygen-awesome-css/doxygen-awesome-sidebar-only.css
+HTML_COLORSTYLE        = LIGHT # required with Doxygen >= 1.9.5
